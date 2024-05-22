@@ -12,13 +12,17 @@
 
 ## Overview
 
-Swift's concurrency system, introduced in [Swift 5.5](https://www.swift.org/blog/swift-5.5-released/), makes asynchronous and parallel code easier to write and understand.
+Swift's concurrency system, introduced in [Swift 5.5](https://www.swift.org/blog/swift-5.5-released/),
+makes asynchronous and parallel code easier to write and understand.
 With the Swift 6 language mode, the compiler can now also
 guarantee that concurrent programs are data-race-free.
-With this mode enabled, the compiler safety checks that were
+When this mode is enabled, the compiler safety checks that were
 optional become required.
 
-Adopting the Swift 6 language mode is entirely under your control, on a per-target basis. Targets that uses previous modes, as well as code uses other languages exposed to Swift, can all interoperate with
+Adopting the Swift 6 language mode is entirely under your control,
+on a per-target basis.
+Targets that build with previous modes, as well as code that uses other
+languages exposed to Swift, can all interoperate with
 modules that have been migrated to Swift 6.
 
 It is possible you have been incrementally adopting all concurrency features
