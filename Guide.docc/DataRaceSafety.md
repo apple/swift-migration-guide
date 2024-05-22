@@ -29,7 +29,7 @@ Swift's concurrency system allows the compiler to understand and verify the
 safety of all mutable state.
 It does this with a mechanism called _data isolation_.
 Data isolation guarantees mutually exclusive
-access to mutable state. It is a form of synchronization, just like a lock.
+access to mutable state. It is a form of synchronization, conceptually similar to a lock.
 But unlike a lock, the protection data isolation provides happens at
 compile-time.
 
@@ -56,8 +56,8 @@ compiler to guarantee Swift code you write is free of data races.
 ### Isolation Domains
 
 Data isolation is the _mechanism_ used to protect shared mutable state.
-But, it is often useful to talk about an independent unit of isolation,
-known as an _isolation domain_.
+But, it is often useful to talk about an independent unit of isolation.
+This is known as an _isolation domain_.
 How much state a particular domain is responsible for
 protecting can vary widely. Isolation domains can contain a single variable.
 Or, they could protect entire subsystems, like an complete user interface.
@@ -65,13 +65,12 @@ Or, they could protect entire subsystems, like an complete user interface.
 The critical feature of an isolation domain is the safety it provides.
 Mutable state can only be accessed from one isolation domain at a time.
 You can pass mutable state from one isolation domain to another, but you can
-never access that state concurrently from different isolation domains
-at once without synchronization.
+never access that state concurrently from a different domain.
 This guarantee is validated by the compiler.
 
-All function and variable declarations have a well-defined static isolation
-domain, even if you have not provided one explicitly.
-There are three possibilities:
+Even if you have not explicitly defined it yourself, _all_ function and variable declarations have a well-defined static isolation
+domain.
+These domains will always fall into one of three categories:
 
 1. Non-isolated
 2. Isolated to an actor value
@@ -86,27 +85,31 @@ This absence of isolation behaves just like a domain all to itself.
 Because all the data isolation rules apply,
 there is no way for non-isolated code to mutate state protected in another
 domain.
-As a result of this, non-isolated entities are always safe to
-access from any other domain.
 
 ```swift
-func freeFunction() {
+func sailTheSea() {
 }
 ```
 
-This top-level function, which has no static isolation, is non-isolated.
-It can safely call other non-isolated functions and access non-isolated variables.
+This top-level function which has no static isolation, making it non-isolated.
+It can safely call other non-isolated functions and access non-isolated variables. But, it cannot access anything from another isolation domain.
 
 ```swift
-class User {
-    var email: String
+class Chicken {
+    let name: String
+    var currentHunger: HungerLevel
 }
 ```
 
 This is an example of a non-isolated type.
-As we will see, inheritance can play a role in isolation.
+Inheritance can play a role in static isolation.
 But, this simple class, with no superclass or protocol conformances,
 also uses the default isolation.
+
+Data isolation guarantees that non-isolated entities cannot access the mutable
+state from other domains.
+As a result of this, non-isolated functions and variables are always safe to
+access from any other domain.
 
 ### Actors
 
@@ -116,28 +119,41 @@ All stored instance properties of an actor are isolated to the enclosing
 actor instance.
 
 ```swift
-actor MyActor {
-    var count: 0
+actor Island {
+    var flock: [Chicken]
+    var food: [Pineapple]
 
-    func increment() {
-        count += 1
+    func addToFlock() {
+        flock.append(Chicken())
     }
 }
 ```
 
-Here, every `MyActor` instance will define a new domain,
-which will be used to protect access to its `count` property.
-The method `MyActor.increment` is said to be isolated to `self`.
-These domains match, making the `count` property synchronously
-accessible within the method's body.
+Here, every `Island` instance will define a new domain,
+which will be used to protect access to its properties.
+The method `Island.addToFlock` is said to be isolated to `self`.
+The body of a method has access to all data that shares its isolation domain, making the `flock` property synchronously accessible.
+
+Actor isolation can be selectively disabled. This can be useful any time you want to keep code organized with an actor type, but opt-out of the isolation requirements that go along with it. Non-isolated methods cannot synchronously access any data within the actor.
+
+```swift
+actor Island {
+    var flock: [Chicken]
+    var food: [Pineapple]
+
+    nonisolated func supportedPlants() -> PlantSpecies {
+        // neither flock nor food are accessible here
+    }
+}
+```
 
 The isolation domain of an actor is not limited to its own methods.
 Functions that accept an isolated parameter can also gain access to
-actor-isolated state.
+actor-isolated state without the need for any other form of synchronization.
 
 ```swift
-func increment(on myActor: isolated MyActor) {
-    myActor.count += 1
+func addToFlock(of island: isolated Island) {
+    island.flock.append(Chicken())
 }
 ```
 
@@ -148,12 +164,14 @@ section of [The Swift Programming Language](https://docs.swift.org/swift-book/do
 
 Global actors share all of the properties of regular actors, but also provide
 a means of statically assigning declarations to their isolation domain.
-This is done with an annotation matching the global actor name.
+This is done with an annotation matching the actor name.
+Global actors are particularly useful when groups of types all need to interoperate as a single pool of shared mutable state.
 
 ```swift
 @MainActor
-class User {
-    var email: String
+class ChickenValley {
+    var flock: [Chicken]
+    var food: [Pineapple]
 }
 ```
 
@@ -163,18 +181,28 @@ to its mutable state is done from that isolation domain.
 ### Tasks
 
 A `task` is a unit of work that can run concurrently within your program.
-Each individual task only executes one function at a time.
-But, tasks may run concurrently with respect to each other.
+You cannot run concurrent code in Swift outside of a task, but that doesn't mean you must always manually start one.
+Typically, asynchronous functions do not need to be aware of the task running them.
+In fact, tasks can often begin at a much higher level, within an application framework, or even at the root of a program.
+
+Tasks may run concurrently with one another, but each individual task only executes one function at a time. They run code in order, from beginning to end.
+
+```swift
+Task {
+    flock.map(Chicken.produce)
+}
+```
 
 A task always has an isolation domain. They can be isolated to an
-actor instance, global actor, or could be non-isolated.
-Their isolation, just like all other Swift code, dictates what mutable state
+actor instance, a global actor, or could be non-isolated.
+This isolation can be established manually, but can also be inherited automatically based on context.
+Task isolation, just like all other Swift code, determines what mutable state
 they can access.
 
 Tasks can run both synchronous and asynchronous code. But, regardless of the
-structure, functions in the same isolation
-domain cannot run concurrently with each other,
-but they can run concurrently with functions in other domains.
+structure and how many tasks are involved, functions in the same isolation
+domain cannot run concurrently with each other.
+There will only ever be one task running synchronous code for any given isolation domain.
 
 > Note: For more information see the [Tasks](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Tasks-and-Task-Groups)
 section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
@@ -182,9 +210,8 @@ section of [The Swift Programming Language](https://docs.swift.org/swift-book/do
 ## Isolation Boundaries
 
 Isolation domains protect their mutable state. But, useful programs need more
-than just protection. They have to make use of that state to produce new data,
-consume data, all of which may not originate in the same domain. Moving values
-into or out of an isolation domain is known as crossing an isolation boundary.
+than just protection. They have to communicate and coordinate, often by passing data back and forth.
+Moving values into or out of an isolation domain is known as crossing an isolation boundary.
 
 Values are only ever permitted to cross an isolation boundary where there
 is no potential for concurrent access to shared mutable state.
