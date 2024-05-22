@@ -198,7 +198,8 @@ class ChickenValley {
     var food: [Pineapple]
 
     nonisolated func canGrow() -> PlantSpecies {
-        // neither flock nor food are accessible here
+        // neither flock, food, nor any other MainActor-isolated
+        // state is accessible here
     }
 }
 ```
