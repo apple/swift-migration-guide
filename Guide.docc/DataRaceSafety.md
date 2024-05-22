@@ -134,14 +134,14 @@ which will be used to protect access to its properties.
 The method `Island.addToFlock` is said to be isolated to `self`.
 The body of a method has access to all data that shares its isolation domain, making the `flock` property synchronously accessible.
 
-Actor isolation can be selectively disabled. This can be useful any time you want to keep code organized with an actor type, but opt-out of the isolation requirements that go along with it. Non-isolated methods cannot synchronously access any data within the actor.
+Actor isolation can be selectively disabled. This can be useful any time you want to keep code organized with an isolated type, but opt-out of the isolation requirements that go along with it. Non-isolated methods cannot synchronously access any protected state.
 
 ```swift
 actor Island {
     var flock: [Chicken]
     var food: [Pineapple]
 
-    nonisolated func supportedPlants() -> PlantSpecies {
+    nonisolated func canGrow() -> PlantSpecies {
         // neither flock nor food are accessible here
     }
 }
@@ -177,6 +177,20 @@ class ChickenValley {
 
 This class is statically-isolated to `MainActor`. This ensures that all access
 to its mutable state is done from that isolation domain.
+
+You can opt-out of this type of actor isolation as well, using the `nonisolated` keyword. And just as with actor types, doing so will disallow access to any protected state.
+
+```swift
+@MainActor
+class ChickenValley {
+    var flock: [Chicken]
+    var food: [Pineapple]
+
+    nonisolated func canGrow() -> PlantSpecies {
+        // neither flock nor food are accessible here
+    }
+}
+```
 
 ### Tasks
 
@@ -219,7 +233,7 @@ is no potential for concurrent access to shared mutable state.
 ### Sendable Types
 
 In some cases, all values of a particular type are safe to pass across
-isolation boundaries because thread safety is a property of the type itself.
+isolation boundaries because thread-safety is a property of the type itself.
 This thread-safe property of types is represented by a conformance to the
 `Sendable` protocol.
 When you see a conformance to `Sendable` in documentation,
@@ -233,57 +247,53 @@ When you use value types, different parts of your program can't have
 shared references to the same value.
 When you pass an instance of a value type to a function,
 the function has its own independent copy of that value.
-Value types in Swift are implicitly `Sendable` within the module when
-their stored properties are Sendable, because value semantics guarantees
-the absence of shared mutable state.
+Because value semantics guarantees the absence of shared mutable state, value
+types in Swift are implicitly `Sendable` when all their stored properties are also Sendable.
+However, this implicit conformance is not visible outside of their defining module. Making a class `Sendable` is part of its public API contract, and must always be done explicitly.
 
-> Note: While internal value types can be implicitly Sendable,
-public value types must explicitly state a conformance to `Sendable`,
-because it's part of their public API.
+```swift
+enum Ripeness {
+    case hard
+    case perfect
+    case mushy(daysPast: Int)
+}
+
+struct Pineapple {
+    var weight: Double
+    var ripeness: Ripeness
+}
+```
+
+Here, both the `Ripeness` and `Pineapple` types are implicitly `Sendable`, since they are composed entirely of `Sendable` value types.
+
+> Note: For more information see the [Sendable Types](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Sendable-Types)
+section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
 
 ### Actor-Isolated Types
 
-Actors and global-actor-isolated types are also implicitly `Sendable`,
-because their mutable state is protected by actor isolation.
-It's safe to pass an actor or actor-isolated type across boundaries.
-But, execution context must switch back to the actor in order to access its
-isolated state.
-`nonisolated` properties and functions may still be accessed from outside
-the actor, because non-isolated functions cannot access actor-isolated state:
+Actors are not value types. But, because they protect all of their state
+in their own isolation domain, they are inherently safe to pass across boundaries. This makes all actor types implicitly `Sendable`.
 
 ```swift
-struct User: Sendable { ... }
+actor Island {
+    var flock: [Chicken]
+    var food: [Pineapple]
+}
+```
 
+Global-actor-isolated types are also implicitly `Sendable` for similar reasons.
+They do not have a private, dedicated isolation domain, but their state is still
+protected by an actor.
+
+```swift
 @MainActor
-class MyModel {
-    nonisolated let id: String
-    private var users: [User] = []
-
-    nonisolated func printID() {
-        print(id)
-    }
-
-    func add(user: User) {
-        users.append(user)
-    }
+class ChickenValley {
+    var flock: [Chicken]
+    var food: [Pineapple]
 }
 ```
 
-In the above code `MyModel` conforms to `Sendable` because all of its
-mutable state is isolated to the global actor `MainActor`.
-An instance of `MyModel` can be used from outside `MainActor`, but only
-the `id` property or the `printID()` method can be used.
-A call to `add(user)` from off the `MainActor` is allowed.
-But, because that function is isolated, it must be done asynchronously to
-provide the runtime the ability to switch to the correct isolation domain.
-
-```swift
-let myModel = MyModel(id: "example")
-Task.detached {
-    myModel.printID()
-    await myModel.add(user: User(...))
-}
-```
+Being `Sendable`, actor and global-actor-isolated type are always safe to pass across isolation boundaries.
 
 ### Reference Types
 
