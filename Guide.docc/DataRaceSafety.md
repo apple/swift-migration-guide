@@ -19,9 +19,9 @@ same memory is being mutated by another thread.
 The Swift 6 language mode eliminates these problems by preventing data races
 at compile time.
 
-> Important: You may have encountered concepts like `async`/`await`
+> Important: You may have encountered constructs like `async`/`await`
 and actors in other languages. Pay extra attention, as similarities to
-Swift's implementation may only be superficial.
+these concepts in Swift may only be superficial.
 
 ## Data Isolation
 
@@ -44,7 +44,7 @@ you are doing so statically. Isolation can be a part of these static
 declarations.
 
 There are cases, however, where the type system alone cannot sufficiently
-describe a system's behavior. An example would be an Objective-C function
+describe a system's behavior. An example could be an Objective-C type
 that has been exposed to Swift. This declaration, made outside of Swift code,
 may not provide enough information to the compiler to ensure safe usage. To
 accommodate these situations, there are additional features that allow you
@@ -55,9 +55,10 @@ compiler to guarantee Swift code you write is free of data races.
 
 ### Isolation Domains
 
-Data isolation is the mechanism used to protect shared mutable state.
-An independent unit of isolation is referred to as an
-_isolation domain_. How much state a particular domain is responsible for
+Data isolation is the _mechanism_ used to protect shared mutable state.
+But, it is often useful to talk about an independent unit of isolation,
+known as an _isolation domain_.
+How much state a particular domain is responsible for
 protecting can vary widely. Isolation domains can contain a single variable.
 Or, they could protect entire subsystems, like an complete user interface.
 
@@ -70,7 +71,6 @@ This guarantee is validated by the compiler.
 
 All function and variable declarations have a well-defined static isolation
 domain, even if you have not provided one explicitly.
-
 There are three possibilities:
 
 1. Non-isolated
@@ -95,6 +95,7 @@ func freeFunction() {
 ```
 
 This top-level function, which has no static isolation, is non-isolated.
+It can safely call other non-isolated functions and access non-isolated variables.
 
 ```swift
 class User {
@@ -102,9 +103,10 @@ class User {
 }
 ```
 
+This is an example of a non-isolated type.
 As we will see, inheritance can play a role in isolation.
 But, this simple class, with no superclass or protocol conformances,
-also uses the default of non-isolated.
+also uses the default isolation.
 
 ### Actors
 
@@ -125,8 +127,9 @@ actor MyActor {
 
 Here, every `MyActor` instance will define a new domain,
 which will be used to protect access to its `count` property.
-`MyActor.increment` is isolated to `self`, making `count` accessible within
-the function body.
+The method `MyActor.increment` is said to be isolated to `self`.
+These domains match, making the `count` property synchronously
+accessible within the method's body.
 
 The isolation domain of an actor is not limited to its own methods.
 Functions that accept an isolated parameter can also gain access to
