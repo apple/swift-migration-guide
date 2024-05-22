@@ -271,9 +271,8 @@ it means the given type is thread safe,
 and values of the type can be shared across arbitrary isolation domains
 without introducing a risk of data races.
 
-Swift encourages using value types because they are naturally safe from
-data races.
-When you use value types, different parts of your program can't have
+Swift encourages using value types because they are naturally safe.
+With value types, different parts of your program can't have
 shared references to the same value.
 When you pass an instance of a value type to a function,
 the function has its own independent copy of that value.
@@ -309,12 +308,13 @@ section of [The Swift Programming Language](https://docs.swift.org/swift-book/do
 Actors are not value types. But, because they protect all of their state
 in their own isolation domain,
 they are inherently safe to pass across boundaries.
-This makes all actor types implicitly `Sendable`.
+This makes all actor types implicitly `Sendable`, even if their properties
+are not `Sendable` themselves.
 
 ```swift
 actor Island {
-    var flock: [Chicken]
-    var food: [Pineapple]
+    var flock: [Chicken]  // non-Sendable
+    var food: [Pineapple] // Sendable
 }
 ```
 
@@ -325,12 +325,12 @@ protected by an actor.
 ```swift
 @MainActor
 class ChickenValley {
-    var flock: [Chicken]
-    var food: [Pineapple]
+    var flock: [Chicken]  // non-Sendable
+    var food: [Pineapple] // Sendable
 }
 ```
 
-Being `Sendable`, actor and global-actor-isolated type are always safe
+Being `Sendable`, actor and global-actor-isolated types are always safe
 to pass across isolation boundaries.
 
 ### Reference Types
@@ -360,29 +360,55 @@ so this opt-out must be used with caution.
 ### Suspension Points
 
 A task can switch between isolation domains when a function in one
-isolation domain calls a function in a different domain.
-When a call crosses an isolation boundary,
-that call must be made asynchronously,
+domain calls a function in another.
+A call that crosses an isolation boundary must be made asynchronously,
 because the destination isolation domain might be busy running other tasks.
 In that case, the task will be suspended until the destination isolation
-domain is free to run the function.
-Critically, a suspension point does not block.
-The current isolation domain (and the thread it is currently running on)
+domain is available.
+Critically, a suspension point does _not_ block.
+The current isolation domain (and the thread it is running on)
 are freed up to perform other work.
 The Swift concurrency runtime expects code to never block on future work,
-allowing the system to always make forward progress,
-which eliminates a common source of deadlocks in concurrent code.
+allowing the system to always make forward progress.
+This eliminates a common source of deadlocks in concurrent code.
+
+```swift
+@MainActor
+func stockUp() {
+    // beginning execution on MainActor
+    let food = Pineapple()
+
+    // switching to the island actor's domain
+    await island.store(food)
+}
+```
 
 Potential suspension points are marked in source code with the `await` keyword.
-The await keyword indicates that the call might suspend at runtime;
-`await` does not force a suspension, and the function being called might
+Its presence indicates that the call might suspend at runtime.
+But, `await` does not force a suspension, and the function being called might
 only suspend under certain dynamic conditions.
-It's possible that a call marked with await doesn't actually suspend.
-In any case, explicitly marking potential suspension points is important
-in concurrent code because suspensions indicate the end of a critical section.
+It's possible that a call marked with `await` doesn't actually suspend.
+
+### Atomiticity
+
+While actors do guarantee safety from data races, they do not ensure
+atomiticity across suspension points.
 Because the current isolation domain is freed up to perform other work,
-actor-isolated state may change across a suspension point.
-As such, your critical sections should always be written in synchronous code.
+actor-isolated state may change after an asynchronous call.
+As a consequence, you can think of explicitly marking potential suspension
+points as a way to indicate the end of a critical section.
+
+```swift
+func deposit(pineapples: [Pineapple], onto island: Island) async {
+   var food = await island.food
+   food += pineapples
+   await island.store(food)
+}
+```
+
+This code assumes, incorrectly, that the `island` actor's `food` value will not
+change between asynchronous calls.
+Critical sections should always be structured to run synchronously.
 
 > Note: For more information, see the [Defining and Calling Asynchronous Functions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions)
 section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
