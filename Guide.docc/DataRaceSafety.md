@@ -88,6 +88,16 @@ Because all the data isolation rules apply,
 there is no way for non-isolated code to mutate state protected in another
 domain.
 
+<!--
+  REFERENCE
+  "Sea", in the context of concurrency, is a reference to the WWDC 2022 session
+  "Eliminate data races using Swift Concurrency".
+
+  Types like Island, Chicken, and Pineapple are also featured in that video.
+
+  https://developer.apple.com/wwdc22/110351
+-->
+
 ```swift
 func sailTheSea() {
 }
