@@ -297,18 +297,18 @@ Being `Sendable`, actor and global-actor-isolated type are always safe to pass a
 
 ### Reference Types
 
-Reference types are only `Sendable` if they do not have any mutable state,
-or if the type implements its own synchronization.
-`Sendable` is never inferred for class types.
-The compiler can only validate the implementation of final classes;
-it's safe for a final class to be `Sendable` as long as its stored properties
-are either immutable and `Sendable`. This includes types that are implicitly
-Sendable because they are isolated to a global actor.
+Unlike value types, reference types cannot be implicitly `Sendable`. And while
+they can be made `Sendable`, doing so comes with a number of constraints. To make a class `Sendable`, it must contain no mutable state. And any immutable
+properties must also be `Sendable`. Further, the compiler can only validate the implementation of final classes.
 
-It is possible to implement thread-safety using synchronization primitives
-that the compiler cannot reason about, such as through OS-specific constructs
-or when working with thread-safe types implemented in C/C++/Objective-C.
-Such types may be marked as conforming to `@unchecked Sendable` to tell the
+```swift
+final class Chicken: Sendable {
+    let name: String
+}
+```
+
+It is possible to satisfy the thread-safety requirements of `Sendable` using synchronization primitives that the compiler cannot reason about, such as through OS-specific constructs or when working with thread-safe types implemented in C/C++/Objective-C.
+Such types may be marked as conforming to `@unchecked Sendable` to promise the
 compiler that the type is thread-safe.
 The compiler will not perform any checking on an `@unchecked Sendable` type,
 so this opt-out must be used with caution.
