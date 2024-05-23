@@ -255,6 +255,83 @@ The Swift Programming Language.
 
 [Tasks]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Tasks-and-Task-Groups
 
+### Isolation Inheritance
+
+There are many ways to specify isolation explicitly.
+But, there are cases where the context of a declaration will establish isolation
+implicitly, via _isolation inheritance_.
+
+#### Classes
+
+If a class has a superclass, it will inherit the isolation of its parent.
+
+```swift
+@MainActor
+class Animal {
+}
+
+class Chicken: Animal {
+}
+```
+
+Because `Chicken` inherits from `Animal`, the static isolation of the `Animal`
+type also implicitly applies.
+Not only that, it also cannot be changed by a subclass.
+All `Animal` instances have been declared to be MainActor-isolated, which
+means all `Chicken` instances must be as well.
+
+> Note: For more information, see the [[Inheritance][] section of
+The Swift Programming Language.
+
+[Inheritance]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/inheritance
+
+#### Protocols
+
+A protocol conformance can also influence isolation.
+However, because protocols offer more flexibility in how they can be applied
+to types, how they affect isolation depends on scope.
+
+```swift
+@MainActor
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+
+// isolation is inherited for the entire type
+class Chicken: Feedable {
+}
+
+// isolation only applies within the extension
+extension Pirate: Feedable {
+}
+
+```
+
+A protocol's requirements themselves can also be isolated.
+This can offer greater control and flexibility around how conforming types
+inherit isolation.
+
+```swift
+protocol Feedable {
+    @MainActor
+    func eat(food: Pineapple)
+}
+```
+
+Regardless of how a protocol is defined and conformance added, you cannot alter
+other mechanisms of static isolation.
+If a type is globally-isolated, either explicitly or via inheritance from a 
+superclass, a protocol be used to change it.
+
+> Note: For more information, see the [Protocols][] section of
+The Swift Programming Language.
+
+[Protocols]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/protocols
+
+#### Closures
+
+...
+
 ## Isolation Boundaries
 
 Isolation domains protect their mutable state. But, useful programs need more
