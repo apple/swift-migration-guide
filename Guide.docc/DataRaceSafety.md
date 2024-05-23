@@ -175,8 +175,10 @@ func addToFlock(of island: isolated Island) {
 }
 ```
 
-> Note: For an overview of actors, please see the [Actors](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Actors)
-section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
+> Note: For an overview of actors, please see the [Actors][] section of
+The Swift Programming Language.
+
+[Actors]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Actors
 
 ### Global Actors
 
@@ -246,8 +248,10 @@ structure and how many tasks are involved, functions in the same isolation
 domain cannot run concurrently with each other.
 There will only ever be one task running synchronous code for any given isolation domain.
 
-> Note: For more information see the [Tasks](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Tasks-and-Task-Groups)
-section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
+> Note: For more information see the [Tasks][] section of
+The Swift Programming Language.
+
+[Tasks]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Tasks-and-Task-Groups
 
 ## Isolation Boundaries
 
@@ -300,8 +304,10 @@ struct Pineapple {
 Here, both the `Ripeness` and `Pineapple` types are implicitly `Sendable`,
 since they are composed entirely of `Sendable` value types.
 
-> Note: For more information see the [Sendable Types](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Sendable-Types)
-section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
+> Note: For more information see the [Sendable Types][] section of
+The Swift Programming Language.
+
+[Sendable Types]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Sendable-Types
 
 ### Actor-Isolated Types
 
@@ -410,5 +416,8 @@ This code assumes, incorrectly, that the `island` actor's `food` value will not
 change between asynchronous calls.
 Critical sections should always be structured to run synchronously.
 
-> Note: For more information, see the [Defining and Calling Asynchronous Functions](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions)
-section of [The Swift Programming Language](https://docs.swift.org/swift-book/documentation/the-swift-programming-language).
+> Note: For more information, see the
+[Defining and Calling Asynchronous Functions][] section of
+The Swift Programming Language.
+
+[Defining and Calling Asynchronous Functions]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Defining-and-Calling-Asynchronous-Functions
