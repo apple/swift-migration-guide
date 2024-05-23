@@ -397,10 +397,10 @@ But, `await` does not force a suspension, and the function being called might
 only suspend under certain dynamic conditions.
 It's possible that a call marked with `await` doesn't actually suspend.
 
-### Atomiticity
+### Atomicity
 
 While actors do guarantee safety from data races, they do not ensure
-atomiticity across suspension points.
+atomicity across suspension points.
 Because the current isolation domain is freed up to perform other work,
 actor-isolated state may change after an asynchronous call.
 As a consequence, you can think of explicitly marking potential suspension
