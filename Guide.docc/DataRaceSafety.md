@@ -185,7 +185,8 @@ The Swift Programming Language.
 Global actors share all of the properties of regular actors, but also provide
 a means of statically assigning declarations to their isolation domain.
 This is done with an annotation matching the actor name.
-Global actors are particularly useful when groups of types all need to interoperate as a single pool of shared mutable state.
+Global actors are particularly useful when groups of types all need to
+interoperate as a single pool of shared mutable state.
 
 ```swift
 @MainActor
@@ -246,7 +247,8 @@ they can access.
 Tasks can run both synchronous and asynchronous code. But, regardless of the
 structure and how many tasks are involved, functions in the same isolation
 domain cannot run concurrently with each other.
-There will only ever be one task running synchronous code for any given isolation domain.
+There will only ever be one task running synchronous code for any given
+isolation domain.
 
 > Note: For more information see the [Tasks][] section of
 The Swift Programming Language.
