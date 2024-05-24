@@ -37,23 +37,28 @@ Here, we have defined global state that allows mutation from any program
 context.
 The declaration is both non-isolated _and_ mutable from any
 isolation domain.
-These are in conflict -- there is no way for the compiler to statically
-enforce safety.
-Even though this is a `Sendable` value type, it is the mutable nature of the
-variable that presents the problem.
+These two poperties are are in conflict.
+Even though this is a `Sendable` value type, there is no way for the
+compiler to statically enforce safety.
 
 ```swift
-let islandsInTheSea = 42
+@MainActor
+func printIslands() {
+    print("Islands in the sea of concurrency: ", islandsInTheSea)
+}
+
+func addIsland() {
+    let island = Island()
+
+    islandsInTheSea += 1
+
+    addToMap(island)
+}
 ```
 
-If this value truly represents a constant, a very straight-forward solution is
-to simply express this to the compiler.
-By changing the `var` to a `let`, the compiler can statically
-disallow mutation, guaranteeing safe read-only access.
-
-But, perhaps this value actually does need to be changed.
-In this case, instead of changing the mutability, we can ensure safety by
-changing the isolation.
+If we had two functions with different isolation domains that access this
+variable, there is a possibility for a race.
+One way to address the problem is by changing variable's isolation.
 
 ```swift
 @MainActor
@@ -61,7 +66,18 @@ var islandsInTheSea = 42
 ```
 
 The variable remains mutable, but has been isolated to a global actor.
-All accesses can now only happen in one isolation domain.
+All accesses can now only happen in one isolation domain, and the synchronous
+access within `addIsland` would be disallowed.
+
+It's also possible the intention was for this value to represent a constant.
+In that case, a very straight-forward solution is to simply express this
+to the compiler.
+By changing the `var` to a `let`, the compiler can statically
+disallow mutation, guaranteeing safe read-only access.
+
+```swift
+let islandsInTheSea = 42
+```
 
 ### Non-Sendable Types
 
