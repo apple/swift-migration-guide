@@ -263,7 +263,7 @@ implicitly, via _isolation inheritance_.
 
 #### Classes
 
-If a class has a superclass, it will inherit the isolation of its parent.
+A subclass will always inherit the isolation of its parent.
 
 ```swift
 @MainActor
@@ -280,16 +280,30 @@ Not only that, it also cannot be changed by a subclass.
 All `Animal` instances have been declared to be MainActor-isolated, which
 means all `Chicken` instances must be as well.
 
-> Note: For more information, see the [[Inheritance][] section of
+The static isolation of a type will also be inherited by its properties and 
+methods by default.
+
+```swift
+@MainActor
+class Animal {
+    // all declarations within this type are also
+    // implicitly MainActor-isolated
+    let name: String
+
+    func eat(food: Pineapple) {
+    }
+}
+```
+
+> Note: For more information, see the [Inheritance][] section of
 The Swift Programming Language.
 
 [Inheritance]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/inheritance
 
 #### Protocols
 
-A protocol conformance can also influence isolation.
-However, because protocols offer more flexibility in how they can be applied
-to types, how they affect isolation depends on scope.
+A protocol conformance can implicitly affect isolation via inheritance.
+However, the protocol's effect on isolation depends on where its conformance is applied.
 
 ```swift
 @MainActor
@@ -297,19 +311,19 @@ protocol Feedable {
     func eat(food: Pineapple)
 }
 
-// isolation is inherited for the entire type
+// inherited isolation applies to the entire type
 class Chicken: Feedable {
 }
 
-// isolation only applies within the extension
+// inherited isolation only applies within the extension
 extension Pirate: Feedable {
 }
 
 ```
 
 A protocol's requirements themselves can also be isolated.
-This can offer greater control and flexibility around how conforming types
-inherit isolation.
+This can offer more fine-grained control around how conforming types inherit
+isolation.
 
 ```swift
 protocol Feedable {
@@ -321,16 +335,51 @@ protocol Feedable {
 Regardless of how a protocol is defined and conformance added, you cannot alter
 other mechanisms of static isolation.
 If a type is globally-isolated, either explicitly or via inheritance from a 
-superclass, a protocol be used to change it.
+superclass, a protocol conformance cannot be used to change it.
 
 > Note: For more information, see the [Protocols][] section of
 The Swift Programming Language.
 
 [Protocols]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/protocols
 
-#### Closures
+#### Function Types
 
-...
+Isolation inheritance allows a type to implicitly define the isolation of
+its properties and methods.
+But these are all examples of _declarations_.
+It is also possible to achieve a similar effect with function _values_.
+
+A closure can capture the isolation at its declaration site, instead of the
+isolation being statically defined by its type.
+This mechanism may sound complex, but in practice it allows very natural
+behaviors.
+
+```
+@MainActor
+func eat(food: Pineapple) {
+    // the static isolation of this function's declaration is
+    // captured by the closure created here
+    Task {
+        // allowing the closure's body to inherit MainActor-isolation
+        Chicken.prizedHen.eat(food: food)
+    }
+}
+```
+
+The closure's type here is defined by `Task.init`.
+Despite that declaration not being isolated to any actor,
+this newly-created task will _inherit_ the `MainActor` isolation of its
+enclosing scope.
+
+It is important to note that this form of isolation inheritance must be done
+explicitly, using the `isolated(any)` annotation.
+Function types offer a number of mechanisms for controlling their
+isolation behavior, but by default, they behave identically to other types.
+
+> Note: For more information, see the [Closures][] section of
+The Swift Programming Language.
+
+[Closures]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/closures
 
 ## Isolation Boundaries
 
