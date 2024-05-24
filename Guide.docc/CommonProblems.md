@@ -91,7 +91,7 @@ carefully.
 nonisolated(unsafe) var islandsInTheSea = 42
 ```
 
-There are many other mechansims for expressing manual synchronzation,
+There are many other mechanisms for expressing manual synchronization,
 described in [Opting-Out of Isolation Checking][] (forthcoming).
 
 [Opting-Out of Isolation Checking]: #
