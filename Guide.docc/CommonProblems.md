@@ -1,4 +1,4 @@
-# Common Problems
+# Common Compiler Errors
 
 Identify, understand, and address problems that frequently come up while working
 with Swift concurrency.
@@ -15,17 +15,17 @@ number of warnings and errors.
 _Don't_ get overwhelmed!
 Most of these can be tracked to a much smaller set of root causes.
 And these causes, frequently, are a result of common patterns which aren't 
-just easy to fix, but can also very instructive in helping to understand how
+just easy to fix, but can also very instructive in helping to understand
 Swift's data isolation model.
 
 ## Unsafe Global and Static Variables
 
 Global state, including static variables, are accessible from anywhere in a
 program.
-This visibility makes them particularly susceptible to unsafe usage.
-Frequently, global state is defined with language constructs that permit
-data-race-prone accesses, and simply rely on programmers never actually
-using them in an unsafe way.
+This visibility makes them particularly susceptible to concurrent access.
+Before data-race safety, global variable patterns relied on programmers
+carefully accessing global state in ways that avoided data-races
+without any help from the compiler.
 
 ### Sendable Types
 
