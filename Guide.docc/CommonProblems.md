@@ -114,10 +114,33 @@ class Chicken {
 
 The problem with this `static let` declaration is not related to the
 mutability of the variable.
-The issue is `Chicken` is non-Sendable, making it unsafe to share access
+The issue is `Chicken` is a non-Sendable type, making it unsafe to share
 across isolation domains.
 
-To address this lack of sendability, see the section on
+```swift
+func feedPrizedHen() {
+    Chicken.prizedHen.currentHunger = .wellFed
+}
+
+@MainActor
+class ChickenValley {
+    var flock: [Chicken]
+
+    func compareHunger() -> Bool {
+        flock.contains { $0.currentHunger > Chicken.prizedHen.currentHunger }
+    }
+}
+```
+
+Here, we see two functions that could access the internal state of the
+`Chicken.prizedHen` concurrently.
+The compiler only permits these kinds of cross-isolation accesses with
+`Sendable` types.
+One option is to isolate the variable to a single domain using a global actor.
+But, it could also make sense to instead add a conformance to `Sendable`
+directly.
+
+For more details how how to add `Sendable` conformances, see the section on
 [Making Types Sendable][] (forthcoming).
 
 [Making Types Sendable]: #
