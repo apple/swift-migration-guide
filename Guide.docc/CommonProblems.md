@@ -79,6 +79,23 @@ disallow mutation, guaranteeing safe read-only access.
 let islandsInTheSea = 42
 ```
 
+There is also the possibility that there is synchronization in place that
+protects this variable in a way that is invisible to the compiler.
+You can express this state to the compiler to disable all isolation
+checking for `islandsInTheSea`.
+Like all manual synchronization, this something you should always do
+carefully.
+
+```swift
+/// This value is only ever accessed while holding `islandLock`.
+nonisolated(unsafe) var islandsInTheSea = 42
+```
+
+There are many other mechansims for expressing manual synchronzation,
+described in [Opting-Out of Isolation Checking][] (forthcoming).
+
+[Opting-Out of Isolation Checking]: #
+
 ### Non-Sendable Types
 
 In the above examples, the variable is an `Int`,
@@ -100,8 +117,10 @@ mutability of the variable.
 The issue is `Chicken` is non-Sendable, making it unsafe to share access
 across isolation domains.
 
-To address this lack of sendability, see the section on making types Sendable
-(forthcoming).
+To address this lack of sendability, see the section on
+[Making Types Sendable][] (forthcoming).
+
+[Making Types Sendable]: #
 
 > Examples of diagnostics produced by the Swift 5.10 compiler for these issues include:  
 >  
