@@ -39,7 +39,7 @@ Here you will find articles and code examples that will:
 - Present strategies to resolve common problems.
 
 > Important: The Swift 6 language mode is opt-in.
-Existing projects will not switch to this mode without configuation changes.
+Existing projects will not switch to this mode without configuration changes.
 
 ## Topics
 
