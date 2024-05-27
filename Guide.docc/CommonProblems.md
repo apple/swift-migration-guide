@@ -13,7 +13,7 @@ can become errors.
 After enabling strict checking, many projects can contain a large
 number of warnings and errors.
 _Don't_ get overwhelmed!
-Most of these can be tracked to a much smaller set of root causes.
+Most of these can be tracked down to a much smaller set of root causes.
 And these causes, frequently, are a result of common patterns which aren't 
 just easy to fix, but can also very instructive in helping to understand
 Swift's data isolation model.
@@ -33,11 +33,10 @@ without any help from the compiler.
 var islandsInTheSea = 42
 ```
 
-Here, we have defined global state that allows mutation from any program
-context.
+Here, we have defined a global variable.
 The declaration is both non-isolated _and_ mutable from any
 isolation domain.
-These two poperties are are in conflict.
+These two poperties are in conflict.
 Even though this is a `Sendable` value type, there is no way for the
 compiler to statically enforce safety.
 
@@ -81,8 +80,7 @@ let islandsInTheSea = 42
 
 There is also the possibility that there is synchronization in place that
 protects this variable in a way that is invisible to the compiler.
-You can express this state to the compiler to disable all isolation
-checking for `islandsInTheSea`.
+You can express this to disable all isolation checking for `islandsInTheSea`.
 Like all manual synchronization, this something you should always do
 carefully.
 
@@ -114,8 +112,8 @@ class Chicken {
 
 The problem with this `static let` declaration is not related to the
 mutability of the variable.
-The issue is `Chicken` is a non-Sendable type, making it unsafe to share
-across isolation domains.
+The issue is `Chicken` is a non-Sendable type, making its internal state
+unsafe to share across isolation domains.
 
 ```swift
 func feedPrizedHen() {
