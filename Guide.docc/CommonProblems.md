@@ -152,3 +152,211 @@ For more details how how to add `Sendable` conformances, see the section on
 > `Static property '_' is not concurrency-safe because it is non-isolated global shared mutable state; this is an error in Swift 6`  
 >  
 > `Static property '_' is not concurrency-safe because it is not either conforming to 'Sendable' or isolated to a global actor; this is an error in Swift 6`
+
+## Protocol Conformance Isolation Mismatch
+
+A protocol defines requirements that a conforming type must satisfy.
+Swift ensures that clients of a protocol can interact with its methods and
+properties in a way that respects data isolation.
+To do this, both the protocol itself and its requirements must specify
+static isolation.
+This can result in isolation mismatches between a protocol's declaration and
+conforming types.
+
+There are many possible solutions to this class of problem, but they often
+involve trade-offs.
+Choosing an appropriate approach first requires understanding _why_ there is a
+mismatch in the first place.
+
+### Under-Specified Protocol
+
+The most commonly-encountered form of this problem happens when a protocol
+has no explicit isolation.
+In this case, as with all other declarations, this implies _non-isolated_.
+
+It is possible that the protocol actually _should_ be isolated, but
+just has not yet been updated for concurrency.
+If conforming types are migrated to add correct isolation first, mismatches
+will occur.
+
+```swift
+// This really only makes sense to use from MainActor types, but
+// has not yet been updated to reflect that.
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+
+// A conforming type, which is now correctly isolated, has exposed 
+// a mismatch.
+@MainActor
+class Chicken: Feedable {
+}
+```
+
+#### Adding Isolation
+
+If a protocol actually should be globally-isolated, adding the missing
+isolation is the most natural solution.
+There are two ways to go about this.
+
+```swift
+// entire protocol
+@MainActor
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+
+// per-requirement
+protocol Feedable {
+    @MainActor
+    func eat(food: Pineapple)
+}
+```
+
+In general, per-requirement isolation offers the most flexibility.
+This should be favored if it makes sense to have conforming types that aren't necessarily also tied to the same global actor.
+Whole-protocol isolation, on the other hand, is more straightforward.
+It works well for protocols that are unlikely to be useful in any other
+isolation domain.
+
+Either way, changing the isolation of a protocol can have wide-spread effects.
+Even if this is the most correct solution logically, it may not be practical
+without changing a significant amount of dependent code.
+It also may not be possible if the protocol is defined in a library or
+some other module not directly under your control.
+
+> Link to "isolate the protocol" code examples
+
+#### Asynchronous Requirements
+
+_Synchronous_ protocol requirements affect the static
+isolation of its conformances.
+Making a requirement asynchronous can offer a lot more flexibility.
+
+```swift
+protocol Feedable {
+    func eat(food: Pineapple) async
+}
+```
+
+However, this flexibility comes at a cost.
+Changing a method to be asynchronous can have a significant impact at
+every call site.
+In addition to an async context, both the parameters and return values may
+need to cross isolation boundaries.
+Together, these could require significant structural changes to address.
+This may still be the right solution, but the side-effects should be carefully
+considered first, even if only a small number of types are involved.
+
+#### Using Preconcurrency
+
+Swift has a number of mechanisms to help you adopt concurrency incrementally
+and interoperate with code that has not yet begun using concurrency at all.
+These tools can be helpful both for code you do not own, as well as code you
+do own, but cannot easily change.
+
+```swift
+@MainActor
+class Chicken: Feedable {
+    nonisolated func eat(food: Pineapple) {
+        MainActor.assumeIsolated {
+            // implementation body
+        }
+    }
+}
+
+// Improved ergonomics and safety with Swift 6's DynamicActorIsolation
+@MainActor
+class Chicken: @preconcurrency Feedable {
+    func eat(food: Pineapple) {
+        // implementation body
+    }
+}
+```
+
+This technique involves two steps.
+It first removes any static isolation that is causing the mismatch.
+Then, it re-introduces the isolation dynamically, to allow useful
+work within the function body.
+This keeps the solution localized to the source of the compiler error.
+It is also a great option for making isolation changes incrementally.
+
+> Link to "preconcurrency protocols" code examples
+
+### Isolated Conforming Type
+
+So far, the solutions presented assume that the cause of the isolation
+mismatches are ultimately rooted in the protocol definition.
+But, it could be that the protocol's static isolation is appropriate,
+and the issue instead is only caused by the conforming type.
+
+#### Non-Isolated
+
+Even a completely non-isolated function can still be useful.
+
+```swift
+@MainActor
+class Chicken: Feedable {
+    nonisolated func eat(food: Pineapple) {
+        // perhaps this implementation doesn't involve
+        // other MainActor-isolated state
+    }
+}
+```
+
+The downside to such an implementation is that isolated state and
+functions become unavailable.
+This is definitely a major constraint, but could still be
+appropriate, especially if it is used exclusively as a source of
+instance-independent configuration.
+
+#### Conformance by Proxy
+
+It could be possible to use an intermediate type to help address static
+isolation differences.
+This can be particularly effective if the protocol requires inheritance by its conforming types.
+
+```swift
+class Animal {
+}
+
+protocol Feedable: Animal {
+    func eat(food: Pineapple)
+}
+
+// actors cannot have class-based inheritance
+actor Island: Feedable {
+}
+```
+
+Introducing a new type to conform indirectly can make this situation work.
+However, this solution will require some structural changes to `Island` that
+could spill out code that depends on it as well.
+
+```swift
+struct LivingIsland: Feedable {
+    func eat(food: Pineapple) {
+    }
+}
+```
+
+Here, a new type has been created that can satisfy the needed inheritance.
+Incorporating will be easiest if the conformance is only used internally by
+`Island`.
+
+> Link to "conformance proxy" code examples
+
+> Examples of diagnostics produced by the Swift 5.10 compiler for these issues include:  
+>  
+> `Actor-isolated instance method '_' cannot be used to satisfy nonisolated protocol requirement`  
+>  
+> `Main actor-isolated instance method '_' cannot be used to satisfy nonisolated protocol requirement`  
+>  
+> `main actor-isolated property '_' cannot be used to satisfy nonisolated protocol requirement`  
+>  
+> `actor-isolated property '_' cannot be used to satisfy nonisolated protocol requirement`  
+>  
+> `main actor-isolated static property '_' cannot be used to satisfy nonisolated protocol requirement`  
+>  
+> `main actor-isolated static method '_' cannot be used to satisfy nonisolated protocol requirement`  
+
