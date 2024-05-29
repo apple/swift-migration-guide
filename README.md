@@ -6,18 +6,8 @@ and built using [Swift-DocC][docc].
 
 ## Contributing
 
-For small changes,
-like typo fixes and changes to a few paragraphs,
-fork this repository and make a pull request.
-
-Content in this guide follows [Apple Style Guide][asg]
-and the Swift Programming Language [style guide][tspl-style].
-
-File bugs about the content using the [issues page][bugs] on Github.
-
-Discussions and contributions follow the [Swift Code of Conduct][conduct].
-
-For more information, see [Contributing to The Swift Programming Language][contributing].
+See [the contributing guide][contributing] for instructions on contributing
+to the Swift Migration Guide.
 
 ## Building
 
