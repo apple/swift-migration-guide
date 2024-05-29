@@ -1,7 +1,7 @@
 # Common Compiler Errors
 
-Identify, understand, and address problems that frequently come up while working
-with Swift concurrency.
+Identify, understand, and address common problems you'll encounter while
+working with Swift concurrency.
 
 The data isolation guarantees made by the compiler affect all Swift code.
 This means strict concurrency checking can surface latent issues,
@@ -34,11 +34,23 @@ var islandsInTheSea = 42
 ```
 
 Here, we have defined a global variable.
-The declaration is both non-isolated _and_ mutable from any
-isolation domain.
-These two poperties are in conflict.
-Even though this is a `Sendable` value type, there is no way for the
-compiler to statically enforce safety.
+The global variable is both non-isolated _and_ mutable from any
+isolation domain. Compiling the above code in Swift 6 mode
+produces an error message:
+
+```
+1 | var islandsInTheSea = 42
+  |              |- error: global variable 'islandsInTheSea' is not concurrency-safe because it is non-isolated global shared mutable state
+  |              |- note: convert 'islandsInTheSea' to a 'let' constant to make the shared state immutable
+  |              |- note: restrict 'islandsInTheSea' to the main actor if it will only be accessed from the main thread
+  |              |- note: unsafely mark 'islandsInTheSea' as concurrency-safe if all accesses are protected by an external synchronization mechanism
+2 |
+```
+
+Two functions with different isolation domains accessing this
+variable risks a data race. In the following code, `printIslands()`
+could be running on the main actor concurrently with a call to
+`addIsland()` from another isolation domian:
 
 ```swift
 @MainActor
@@ -55,8 +67,6 @@ func addIsland() {
 }
 ```
 
-If we had two functions with different isolation domains that access this
-variable, there is a possibility for a race.
 One way to address the problem is by changing variable's isolation.
 
 ```swift
@@ -66,11 +76,10 @@ var islandsInTheSea = 42
 
 The variable remains mutable, but has been isolated to a global actor.
 All accesses can now only happen in one isolation domain, and the synchronous
-access within `addIsland` would be disallowed.
+access within `addIsland` would be invalid at compile time.
 
-It's also possible the intention was for this value to represent a constant.
-In that case, a very straight-forward solution is to simply express this
-to the compiler.
+If the variable is meant to be constant and is never mutated,
+a straight-forward solution is to express this to the compiler.
 By changing the `var` to a `let`, the compiler can statically
 disallow mutation, guaranteeing safe read-only access.
 
@@ -78,16 +87,18 @@ disallow mutation, guaranteeing safe read-only access.
 let islandsInTheSea = 42
 ```
 
-There is also the possibility that there is synchronization in place that
-protects this variable in a way that is invisible to the compiler.
-You can express this to disable all isolation checking for `islandsInTheSea`.
-Like all manual synchronization, this something you should always do
-carefully.
+If there is synchronization in place that protects this variable in a way that
+is invisible to the compiler, you can disable all isolation checking for
+`islandsInTheSea` using the `nonisolated(unsafe)` keyword:
 
 ```swift
 /// This value is only ever accessed while holding `islandLock`.
 nonisolated(unsafe) var islandsInTheSea = 42
 ```
+
+Only use `nonisolated(unsafe)` when you are carefully guarding all access to
+the variable with an external synchronization mechanism such as a lock or
+dispatch queue.
 
 There are many other mechanisms for expressing manual synchronization,
 described in [Opting-Out of Isolation Checking][] (forthcoming).
@@ -143,15 +154,7 @@ For more details how how to add `Sendable` conformances, see the section on
 
 [Making Types Sendable]: #
 
-> Examples of diagnostics produced by the Swift 5.10 compiler for these issues include:  
->  
-> `Let '_' is not concurrency-safe because it is not either conforming to 'Sendable' or isolated to a global actor; this is an error in Swift 6`  
->  
-> `Reference to static property '_' is not concurrency-safe because it involves shared mutable state; this is an error in Swift 6`  
->  
-> `Static property '_' is not concurrency-safe because it is non-isolated global shared mutable state; this is an error in Swift 6`  
->  
-> `Static property '_' is not concurrency-safe because it is not either conforming to 'Sendable' or isolated to a global actor; this is an error in Swift 6`
+> For more global and static variable code examples, see (link to relevant Swift file in package).
 
 ## Protocol Conformance Isolation Mismatch
 
@@ -173,6 +176,34 @@ mismatch in the first place.
 The most commonly-encountered form of this problem happens when a protocol
 has no explicit isolation.
 In this case, as with all other declarations, this implies _non-isolated_.
+Non-isolated protocol requirements can be called from generic code in any
+isolation domain. If the requirement is synchronous, it is invalid for
+a conforming type's implementation to access actor-isolated state:
+
+```swift
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+
+@MainActor
+class Chicken: Feedable {
+    func eat(food: Pineapple) {
+        // access main-actor-isolated state
+    }
+}
+```
+
+The above code produces the following error in Swift 6 mode:
+
+```
+ 5 | @MainActor
+ 6 | class Chicken: Feedable {
+ 7 |     func eat(food: Pineapple) {
+   |          |- error: main actor-isolated instance method 'eat(food:)' cannot be used to satisfy nonisolated protocol requirement
+   |          `- note: add 'nonisolated' to 'eat(food:)' to make this instance method not isolated to the actor
+ 8 |         // access main-actor-isolated state
+ 9 |     }
+```
 
 It is possible that the protocol actually _should_ be isolated, but
 just has not yet been updated for concurrency.
@@ -195,9 +226,10 @@ class Chicken: Feedable {
 
 #### Adding Isolation
 
-If a protocol actually should be globally-isolated, adding the missing
-isolation is the most natural solution.
-There are two ways to go about this.
+If protocol requirements are always called from the main actor,
+adding `@MainActor` is the best solution.
+
+There are two ways to isolate a protocol requirement to the main actor:
 
 ```swift
 // entire protocol
@@ -213,31 +245,65 @@ protocol Feedable {
 }
 ```
 
-In general, per-requirement isolation offers the most flexibility.
-This should be favored if it makes sense to have conforming types that aren't necessarily also tied to the same global actor.
-Whole-protocol isolation, on the other hand, is more straightforward.
-It works well for protocols that are unlikely to be useful in any other
-isolation domain.
+Marking a protocol with a global actor attribute implies global actor isolation
+on all protocol requirements and extension methods. The global actor is also
+inferred on conforming types when the conformance is not declared in an
+extension.
 
-Either way, changing the isolation of a protocol can have wide-spread effects.
-Even if this is the most correct solution logically, it may not be practical
-without changing a significant amount of dependent code.
-It also may not be possible if the protocol is defined in a library or
-some other module not directly under your control.
+Per-requirement isolation has a narrower impact on actor isolation inference,
+because inference only applies to the implementation of that requirement. It
+does not impact the inferred isolation of protocol extensions or other methods
+on the conforming type. This approach should be favored if it makes sense to
+have conforming types that aren't necessarily also tied to the same global actor.
+
+Either way, changing the isolation of a protocol can affect the isolation of
+conforming types and it can impose restrictions on generic code using the
+protocol in a generic requirement. You can stage in diagnostics caused by
+adding global actor isolation on a protocol using `@preconcurrency`:
+
+```swift
+@preconcurrency @MainActor
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+```
 
 > Link to "isolate the protocol" code examples
 
 #### Asynchronous Requirements
 
-_Synchronous_ protocol requirements affect the static
-isolation of its conformances.
-Making a requirement asynchronous can offer a lot more flexibility.
+For methods that implement synchronous protocol requirements, either the
+isolation of method must match the isolation of the requirement exactly,
+or the method must be `nonisolated`, meaning it can be called from
+any isolation domain without risk of data races. Making a requirement
+asynchronous offers a lot more flexibility over the isolation in
+conforming types.
 
 ```swift
 protocol Feedable {
     func eat(food: Pineapple) async
 }
 ```
+
+Because `async` methods guarantee isolation by switching to the corresponding
+actor in the implementation, it's possible to satisfy a non-isolated `async`
+protocol requirement with an isolated method:
+
+```swift
+@MainActor
+class Chicken: Feedable {
+    var isHungry: Bool = true
+    func eat(food: Pineapple) {
+        // implicit switch to the @MainActor before accessing main actor state
+
+        isHungry.toggle()
+    }
+}
+```
+
+The above code is safe, because generic code must always call `eat(food:)`
+asynchronously, allowing isolated implementations to switch actors before
+accessing actor-isolated state.
 
 However, this flexibility comes at a cost.
 Changing a method to be asynchronous can have a significant impact at
