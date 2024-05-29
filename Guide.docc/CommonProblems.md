@@ -272,15 +272,38 @@ protocol Feedable {
 
 #### Asynchronous Requirements
 
-_Synchronous_ protocol requirements affect the static
-isolation of its conformances.
-Making a requirement asynchronous can offer a lot more flexibility.
+_Synchronous_ protocol requirements require that either the isolation of
+implementations matches the exact isolation of the requirement,
+or the implementation is `nonisolated`, meaning it can be called from
+any isolation domain without risk of data races. Making a requirement
+asynchronous offers a lot more flexibility over the isolation of
+implementations.
 
 ```swift
 protocol Feedable {
     func eat(food: Pineapple) async
 }
 ```
+
+Because `async` methods guarantee isolation by switching to the corresponding
+actor in the implementation, it's possible to satisfy a non-isolated `async`
+protocol requirement with an isolated method:
+
+```swift
+@MainActor
+class Chicken: Feedable {
+    var isHungry: Bool = true
+    func eat(food: Pineapple) {
+        // implicit switch to the @MainActor before accessing main actor state
+
+        isHungry.toggle()
+    }
+}
+```
+
+The above code is safe, because generic code must always call `eat(food:)`
+asynchronously, allowing isolated implementations to switch actors before
+accessing actor-isolated state.
 
 However, this flexibility comes at a cost.
 Changing a method to be asynchronous can have a significant impact at
