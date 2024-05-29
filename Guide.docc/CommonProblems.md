@@ -272,12 +272,12 @@ protocol Feedable {
 
 #### Asynchronous Requirements
 
-_Synchronous_ protocol requirements require that either the isolation of
-implementations matches the exact isolation of the requirement,
-or the implementation is `nonisolated`, meaning it can be called from
+For methods that implement synchronous protocol requirements, either the
+isolation of method must match the isolation of the requirement exactly,
+or the method must be `nonisolated`, meaning it can be called from
 any isolation domain without risk of data races. Making a requirement
-asynchronous offers a lot more flexibility over the isolation of
-implementations.
+asynchronous offers a lot more flexibility over the isolation in
+conforming types.
 
 ```swift
 protocol Feedable {
