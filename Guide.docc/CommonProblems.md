@@ -176,6 +176,34 @@ mismatch in the first place.
 The most commonly-encountered form of this problem happens when a protocol
 has no explicit isolation.
 In this case, as with all other declarations, this implies _non-isolated_.
+Non-isolated protocol requirements can be called from generic code in any
+isolation domain. If the requirement is synchronous, it is invalid for
+a conforming type's implementation to access actor-isolated state:
+
+```swift
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+
+@MainActor
+class Chicken: Feedable {
+    func eat(food: Pineapple) {
+        // access main-actor-isolated state
+    }
+}
+```
+
+The above code produces the following error in Swift 6 mode:
+
+```
+ 5 | @MainActor
+ 6 | class Chicken: Feedable {
+ 7 |     func eat(food: Pineapple) {
+   |          |- error: main actor-isolated instance method 'eat(food:)' cannot be used to satisfy nonisolated protocol requirement
+   |          `- note: add 'nonisolated' to 'eat(food:)' to make this instance method not isolated to the actor
+ 8 |         // access main-actor-isolated state
+ 9 |     }
+```
 
 It is possible that the protocol actually _should_ be isolated, but
 just has not yet been updated for concurrency.
@@ -198,9 +226,10 @@ class Chicken: Feedable {
 
 #### Adding Isolation
 
-If a protocol actually should be globally-isolated, adding the missing
-isolation is the most natural solution.
-There are two ways to go about this.
+If protocol requirements are always called from the main actor,
+adding `@MainActor` is the best solution.
+
+There are two ways to isolate a protocol requirement to the main actor:
 
 ```swift
 // entire protocol
@@ -216,17 +245,28 @@ protocol Feedable {
 }
 ```
 
-In general, per-requirement isolation offers the most flexibility.
-This should be favored if it makes sense to have conforming types that aren't necessarily also tied to the same global actor.
-Whole-protocol isolation, on the other hand, is more straightforward.
-It works well for protocols that are unlikely to be useful in any other
-isolation domain.
+Marking a protocol with a global actor attribute implies global actor isolation
+on all protocol requirements and extension methods. The global actor is also
+inferred on conforming types when the conformance is not declared in an
+extension.
 
-Either way, changing the isolation of a protocol can have wide-spread effects.
-Even if this is the most correct solution logically, it may not be practical
-without changing a significant amount of dependent code.
-It also may not be possible if the protocol is defined in a library or
-some other module not directly under your control.
+Per-requirement isolation has a narrower impact on actor isolation inference,
+because inference only applies to the implementation of that requirement. It
+does not impact the inferred isolation of protocol extensions or other methods
+on the conforming type. This approach should be favored if it makes sense to
+have conforming types that aren't necessarily also tied to the same global actor.
+
+Either way, changing the isolation of a protocol can affect the isolation of
+conforming types and it can impose restrictions on generic code using the
+protocol in a generic requirement. You can stage in diagnostics caused by
+adding global actor isolation on a protocol using `@preconcurrency`:
+
+```swift
+@preconcurrency @MainActor
+protocol Feedable {
+    func eat(food: Pineapple)
+}
+```
 
 > Link to "isolate the protocol" code examples
 
