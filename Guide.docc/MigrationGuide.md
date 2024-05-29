@@ -34,7 +34,7 @@ provide concepts and practical help to ease the migration.
 Here you will find articles and code examples that will:
 
 - Explain the concepts used by Swift's data-race safety model.
-- Help you enable strict concurrency checking with Swift 5 projects.
+- Help you enable complete concurrency checking with Swift 5 projects.
 - Provide techniques for incremental adoption.
 - Present strategies to resolve common problems.
 
@@ -44,6 +44,6 @@ Existing projects will not switch to this mode without configuration changes.
 ## Topics
 
 - <doc:DataRaceSafety>
-- <doc:StrictChecking>
+- <doc:CompleteChecking>
 - <doc:IncrementalAdoption>
 - <doc:CommonProblems>
