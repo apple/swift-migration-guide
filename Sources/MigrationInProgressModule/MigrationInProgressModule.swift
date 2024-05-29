@@ -1,7 +1,9 @@
 import FullyMigratedModule
 
-func captureNonSendable(argument: ColorComponents) {
-    Task {
-        print(argument)
-    }
+@MainActor
+func applyBackground(_ color: ColorComponents) {
+}
+
+func updateStyle(backgroundColor: ColorComponents) async {
+    await applyBackground(backgroundColor)
 }
