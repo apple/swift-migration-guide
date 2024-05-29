@@ -66,3 +66,5 @@ Pull requests must pass CI testing via `@swift-ci please test` before the change
 Reviewers will be tagged automatically when you open a pull request. You may
 be asked to make changes during code review. When you are ready, use the
 request re-review feature of github or mention the reviewers by name in a comment.
+
+[bugs]: https://github.com/apple/swift-migration-guide/issues

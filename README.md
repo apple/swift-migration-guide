@@ -1,8 +1,7 @@
 # The Swift Concurrency Migration Guide
 
 This repository contains the source for *The Swift Concurrency Migration Guide*,
-which is published on [docs.swift.org][published]
-and built using [Swift-DocC][docc].
+which is built using [Swift-DocC][docc].
 
 ## Contributing
 
@@ -27,10 +26,6 @@ open the link that `docc` outputs to display a local preview in your browser.
 > If you installed DocC by downloading Xcode,
 > use `xcrun docc` instead.
 
-[asg]: https://help.apple.com/applestyleguide/
-[bugs]: https://github.com/apple/swift-migration-guide/issues
-[contributing]: https://github.com/apple/swift-book/CONTRIBUTING.md
+[contributing]: https://github.com/apple/swift-migration-guide/CONTRIBUTING.md
 [docc]: https://github.com/apple/swift-docc
 [conduct]: https://www.swift.org/code-of-conduct
-[published]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/
-[tspl-style]: https://github.com/apple/swift-book/Style.md
