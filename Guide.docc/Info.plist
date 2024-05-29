@@ -6,8 +6,6 @@
 	<string>Swift 6 Concurrency Migration Guide</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.swift.migration.6</string>
-	<key>CDDefaultCodeListingLanguage</key>
-	<string>swift</string>
 	<key>CDDefaultModuleKind</key>
 	<string></string>
 </dict>
