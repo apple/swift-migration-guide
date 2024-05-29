@@ -4,13 +4,13 @@ Identify, understand, and address common problems you'll encounter while
 working with Swift concurrency.
 
 The data isolation guarantees made by the compiler affect all Swift code.
-This means strict concurrency checking can surface latent issues,
+This means complete concurrency checking can surface latent issues,
 even in Swift 5 code that doesn't use any concurrency language features
 directly.
 And, with the Swift 6 language mode is on, some of these potential issues
 can become errors.
 
-After enabling strict checking, many projects can contain a large
+After enabling complete checking, many projects can contain a large
 number of warnings and errors.
 _Don't_ get overwhelmed!
 Most of these can be tracked down to a much smaller set of root causes.
