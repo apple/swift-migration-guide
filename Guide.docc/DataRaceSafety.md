@@ -318,7 +318,6 @@ class Chicken: Feedable {
 // inherited isolation only applies within the extension
 extension Pirate: Feedable {
 }
-
 ```
 
 A protocol's requirements themselves can also be isolated.
@@ -354,7 +353,7 @@ isolation being statically defined by its type.
 This mechanism may sound complex, but in practice it allows very natural
 behaviors.
 
-```
+```swift
 @MainActor
 func eat(food: Pineapple) {
     // the static isolation of this function's declaration is
