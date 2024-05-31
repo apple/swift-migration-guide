@@ -555,6 +555,21 @@ see [Isolation Granularity][]. (forthcoming)
 
 [Isolation Granularity]: #
 
+### Computed Value
+
+Instead of trying to pass a non-`Sendable` type across a boundary, it may be
+possible to use a `Sendable` function that creates the needed values.
+
+```swift
+func updateStyle(backgroundColorProvider: @Sendable () -> ColorComponents) async {
+    await applyBackground(using: backgroundColorProvider)
+}
+```
+
+Here, it does not matter than `ColorComponents` is not `Sendable`.
+By using `@Sendable` function that can compute the value, the lack of
+sendability is side-stepped entirely.
+
 ### Sendable Conformance
 
 When encountering problem related to a lack of sendability, a very natural
