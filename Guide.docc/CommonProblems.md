@@ -651,3 +651,72 @@ But this can still be a useful technique when reference semantics need to be
 preserved, or for types that are part of a mixed Swift/Objective-C code base.
 
 > Link to "reference types" code examples
+
+### Non-Isolated Initialization
+
+Actor-isolated types can present a problem when they have to be initialized in
+a non-isolated context.
+This occurs frequently when the type is used in a default value expression or
+as a property initializer.
+
+> Note: These problems could also be a symptom of
+[latent isolation](#Latent-Isolation) or an
+[under-specified protocol](#Under-Specified-Protocol).
+
+Here the non-isolated `Stylers` type is making a call to a
+`MainActor`-isolated initializer.
+
+```swift
+@MainActor
+class WindowStyler {
+    init() {
+    }
+}
+
+struct Stylers {
+    static let window = WindowStyler()
+}
+```
+
+This code results in the following error:
+
+```
+ 7 | 
+ 8 | struct Stylers {
+ 9 |     static let window = WindowStyler()
+   |                `- error: main actor-isolated default value in a nonisolated context
+10 | }
+11 | 
+```
+
+Globally-isolated types sometimes don't actually need to reference any global
+actor state in their initializers.
+
+```swift
+@MainActor
+class WindowStyler {
+    nonisolated init() {
+    }
+}
+```
+
+By making the `init` method `nonisolated`, it is free to be called from any
+isolation domain.
+This remains safe as the compile still guarantees that any state that *is*
+isolated will only be accessable from the `MainActor`.
+
+Most types like this will have isolated properties.
+But, this technique can still potentially be used, if the 
+properties themselves can be initialized using default expressions.
+
+```swift
+@MainActor
+class WindowStyler {
+    // also MainActor-isolated
+    private var windowCount = 1
+
+    nonisolated init() {
+        // type is still fully-initialized here
+    }
+}
+```
