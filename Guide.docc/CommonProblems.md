@@ -300,7 +300,7 @@ Together, these could require significant structural changes to address.
 This may still be the right solution, but the side-effects should be carefully
 considered first, even if only a small number of types are involved.
 
-#### Using Preconcurrency
+#### Preconcurrency Conformance
 
 Swift has a number of mechanisms to help you adopt concurrency incrementally
 and interoperate with code that has not yet begun using concurrency at all.
@@ -472,6 +472,33 @@ type's API contract.
 Removing the conformance is a API-breaking change.
 
 > Link to "making value types Sendable" code examples
+
+### Preconcurrency Import
+
+Even if the type in another module is actually `Sendable`, it is not always
+possible or convenient to modify its definition.
+It also could be that the type is not `Sendable`, but depends on client
+cooperation for safe usage.
+In these cases, you can use a `@preconcurrency import` to address errors.
+
+```swift
+// ColorComponents defined here
+@preconcurrency import UnmigratedModule
+
+func updateStyle(backgroundColor: ColorComponents) async {
+    // crossing an isolation domain here
+    await applyBackground(backgroundColor)
+}
+```
+
+With the addition of this `@preconcurrency import`,
+`ColorComponents` remains non-`Sendable`.
+However, the compiler's behavior will be altered.
+When using the Swift 6 language mode, the produced here will be downgraded
+to a warning.
+The Swift 5 language mode will produce no diagnostics at all.
+
+> Link to "preconcurrency import" code examples
 
 ### Latent Isolation
 
