@@ -457,7 +457,7 @@ will result in an error:
 10 | 
 ```
 A very straightforward solution is just to make the type's `Sendable`
-conformance explict.
+conformance explicit.
 
 ```swift
 public struct ColorComponents: Sendable {
@@ -469,14 +469,14 @@ Even when trivial, adding a `Sendable` conformance should always be
 done with care.
 Remember that `Sendable` is a guarantee of thread-safety, and part of a
 type's API contract.
-Removing the conformance is a API-breaking change.
+Removing the conformance is an API-breaking change.
 
 > Link to "making value types Sendable" code examples
 
 ### Preconcurrency Import
 
 Even if the type in another module is actually `Sendable`, it is not always
-possible or convenient to modify its definition.
+possible to modify its definition.
 It also could be that the type is not `Sendable`, but depends on client
 cooperation for safe usage.
 In these cases, you can use a `@preconcurrency import` to address errors.
@@ -502,7 +502,7 @@ The Swift 5 language mode will produce no diagnostics at all.
 
 ### Latent Isolation
 
-Sometimes the _appearent_ need for a `Sendable` type can actually be the
+Sometimes the _apparent_ need for a `Sendable` type can actually be the
 symptom of a more fundamental isolation problem.
 The only reason a type needs to be `Sendable` is to cross isolation boundaries.
 If you can avoid crossing boundaries altogether, the result can
@@ -546,7 +546,7 @@ simplification possible.
 
 Lack of `MainActor` isolation like this is, by far, the most common form of
 latent isolation.
-It is also very common for developers to hestitate to use this as a solution.
+It is also very common for developers to hesitate to use this as a solution.
 It is completely normal for programs with a user interface to have a large
 set of `MainActor`-isolated state.
 Concerns around long-running _synchronous_ work can often be addressed with
@@ -574,8 +574,8 @@ sendability is side-stepped entirely.
 
 ### Sendable Conformance
 
-When encountering problem related to a lack of sendability, a very natural
-reaction is to just try to add a conformance to `Sendable`.
+When encountering problems related to crossing isolation domains, a very
+natural reaction is to just try to add a conformance to `Sendable`.
 You can make a type `Sendable` in four ways.
 
 #### Global Isolation
@@ -719,8 +719,8 @@ class WindowStyler {
 
 By making the `init` method `nonisolated`, it is free to be called from any
 isolation domain.
-This remains safe as the compile still guarantees that any state that *is*
-isolated will only be accessable from the `MainActor`.
+This remains safe as the compiler still guarantees that any state that *is*
+isolated will only be accessible from the `MainActor`.
 
 Most types like this will have isolated properties.
 But, this technique can still potentially be used, if the 
