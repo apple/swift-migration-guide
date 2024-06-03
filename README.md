@@ -26,6 +26,6 @@ open the link that `docc` outputs to display a local preview in your browser.
 > If you installed DocC by downloading Xcode,
 > use `xcrun docc` instead.
 
-[contributing]: https://github.com/apple/swift-migration-guide/CONTRIBUTING.md
+[contributing]: https://github.com/apple/swift-migration-guide/blob/main/CONTRIBUTING.md
 [docc]: https://github.com/apple/swift-docc
 [conduct]: https://www.swift.org/code-of-conduct
