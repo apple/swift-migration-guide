@@ -50,7 +50,7 @@ produces an error message:
 Two functions with different isolation domains accessing this
 variable risks a data race. In the following code, `printIslands()`
 could be running on the main actor concurrently with a call to
-`addIsland()` from another isolation domian:
+`addIsland()` from another isolation domain:
 
 ```swift
 @MainActor
