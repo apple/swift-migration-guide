@@ -23,15 +23,20 @@ public struct ColorComponents {
 
 /// Explicitly-Sendable variant of `ColorComponents`.
 public struct SendableColorComponents : Sendable {
-    public let red: Float
-    public let green: Float
-    public let blue: Float
+	public let red: Float = 1.0
+	public let green: Float = 1.0
+	public let blue: Float = 1.0
 
-    public init(red: Float, green: Float, blue: Float) {
-        self.red = red
-        self.green = green
-        self.blue = blue
-    }
+	public init() {}
+}
+
+@MainActor
+public struct GloballyIsolatedColorComponents : Sendable {
+	public let red: Float = 1.0
+	public let green: Float = 1.0
+	public let blue: Float = 1.0
+
+	public init() {}
 }
 
 public protocol Styling {
