@@ -1,7 +1,2 @@
-import FullyMigratedModule
+import UnmigratedModule
 
-func captureNonSendable(argument: ColorComponents) {
-    Task {
-        print(argument)
-    }
-}

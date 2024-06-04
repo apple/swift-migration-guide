@@ -43,14 +43,22 @@ let package = Package(
 			name: "FullyMigratedModule",
 			swiftSettings: [toolsSwiftMode] + baseSettings
 		),
+        .target(
+            name: "UnmigratedModule",
+            swiftSettings: [swift5Mode] + baseSettings
+        ),
+        .target(
+            name: "ObjCModule",
+            publicHeadersPath: "."
+        ),
 		.target(
 			name: "MigrationInProgressModule",
-			dependencies: ["FullyMigratedModule"],
+			dependencies: ["FullyMigratedModule", "UnmigratedModule", "ObjCModule"],
 			swiftSettings: [toolsSwiftMode] + baseSettings
 		),
 		.executableTarget(
 			name: "Swift5Examples",
-			dependencies: [],
+			dependencies: ["UnmigratedModule", "ObjCModule"],
 			swiftSettings: [swift5Mode] + baseSettings
 		),
 	]
@@ -62,7 +70,7 @@ print("swift6_examples is unavailable with this version of the compiler")
 package.targets.append(
 	.executableTarget(
 		name: "Swift6Examples",
-		dependencies: [],
+		dependencies: ["UnmigratedModule"],
 		swiftSettings: [swift6Mode] + baseSettings
 	)
 )
