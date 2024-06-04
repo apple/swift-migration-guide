@@ -100,11 +100,6 @@ Only use `nonisolated(unsafe)` when you are carefully guarding all access to
 the variable with an external synchronization mechanism such as a lock or
 dispatch queue.
 
-There are many other mechanisms for expressing manual synchronization,
-described in [Opting-Out of Isolation Checking][] (forthcoming).
-
-[Opting-Out of Isolation Checking]: #
-
 ### Non-Sendable Types
 
 In the above examples, the variable is an `Int`,
@@ -148,13 +143,6 @@ The compiler only permits these kinds of cross-isolation accesses with
 One option is to isolate the variable to a single domain using a global actor.
 But, it could also make sense to instead add a conformance to `Sendable`
 directly.
-
-For more details how how to add `Sendable` conformances, see the section on
-[Making Types Sendable][] (forthcoming).
-
-[Making Types Sendable]: #
-
-> For more global and static variable code examples, see (link to relevant Swift file in package).
 
 ## Protocol Conformance Isolation Mismatch
 
@@ -268,8 +256,6 @@ protocol Feedable {
 }
 ```
 
-> Link to "isolate the protocol" code examples
-
 #### Asynchronous Requirements
 
 For methods that implement synchronous protocol requirements, either the
@@ -347,8 +333,6 @@ work within the function body.
 This keeps the solution localized to the source of the compiler error.
 It is also a great option for making isolation changes incrementally.
 
-> Link to "preconcurrency protocols" code examples
-
 ### Isolated Conforming Type
 
 So far, the solutions presented assume that the cause of the isolation
@@ -409,20 +393,3 @@ struct LivingIsland: Feedable {
 Here, a new type has been created that can satisfy the needed inheritance.
 Incorporating will be easiest if the conformance is only used internally by
 `Island`.
-
-> Link to "conformance proxy" code examples
-
-> Examples of diagnostics produced by the Swift 5.10 compiler for these issues include:  
->  
-> `Actor-isolated instance method '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `Main actor-isolated instance method '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `main actor-isolated property '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `actor-isolated property '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `main actor-isolated static property '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `main actor-isolated static method '_' cannot be used to satisfy nonisolated protocol requirement`  
-
