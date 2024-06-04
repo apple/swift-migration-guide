@@ -13,8 +13,26 @@ public struct ColorComponents {
         self.green = green
         self.blue = blue
     }
+
+    public init() {
+        self.red = 1.0
+        self.green = 1.0
+        self.blue = 1.0
+    }
 }
 
+/// Explicitly-Sendable variant of `ColorComponents`.
+public struct SendableColorComponents : Sendable {
+    public let red: Float
+    public let green: Float
+    public let blue: Float
+
+    public init(red: Float, green: Float, blue: Float) {
+        self.red = red
+        self.green = green
+        self.blue = blue
+    }
+}
 
 public protocol Styling {
     func updateStyle(completionHandler: () -> Void)

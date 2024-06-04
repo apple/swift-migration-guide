@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "ObjCModule.h"
+#import "ObjCLibrary.h"
 
 @implementation OCMPattern
 
