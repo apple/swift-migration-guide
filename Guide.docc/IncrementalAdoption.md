@@ -172,8 +172,30 @@ public class WindowStyler {
 Using `@preconcurrency` this way marks the isolation as conditional on the
 client module also having complete checking enabled.
 
-
 ## Dependencies
+
+Often, you aren't in control of the modules you need to import as dependencies.
+If these modules have not yet adopted Swift 6, you may find yourself with
+errors that are difficult or impossible to resolve.
+
+There are a number of different kinds of problems that result from using
+unmigrated code.
+
+Situations where `@preconcurrency` can help include:
+
+- [Non-Sendable types][]
+- Mismatches in [protocol-conformance isolation][]
+
+[Non-Sendable types]: 
+
+> Note: For more information, see [Crossing Isolation Boundaries][]
+
+[Crossing Isolation Boundaries]: commonproblems#Crossing-Isolation-Boundaries
+
+An import annotated with `@preconcurrency` can downgrade diagnostics related
+to non-Sendable types within the module.
+
+It can downgrade isolation boundary checking problems, resolve
 
 ### Pre-Swift 6
 
