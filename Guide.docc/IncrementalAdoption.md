@@ -4,18 +4,19 @@ Learn how you can introduce Swift currency features into your project
 incrementally.
 
 The Swift 6 language mode must be explicitly enabled for existing projects.
-But, enabling the mode is just the first part of the process.
-You'll probably want to progress by making incremental changes that do not
-disrupt project.
+However, enabling the mode is just the first part of the migration process.
+It could take many changes, across different modules to complete.
+To make this practical, these changes can be made _incrementally_.
+This allows you to progress without disrupting the entire project.
 
-Swift includes a number of language features and standard libary APIs to help
-make this process easier.
+Swift includes a number of language features and standard library APIs to help
+make incremental adoption easier.
 
 ## Wrapping Callback-Based Functions
 
 APIs that accept and invoke a single function on completion are an extremely
 common pattern in Swift.
-It's possible to make version of such a function that is usable directly from 
+It's possible to make a version of such a function that is usable directly from 
 an asynchronous context.
 
 ```swift
@@ -26,7 +27,8 @@ func updateStyle(backgroundColor: ColorComponents, completionHandler: @escaping 
 
 This is an example of a function that informs a client its work is complete
 using a callback.
-You can wrap this function up into an asynchronous version using continuations.
+You can wrap this function up into an asynchronous version using
+_continuations_.
 
 ```swift
 func updateStyle(backgroundColor: ColorComponents) async {
@@ -38,25 +40,26 @@ func updateStyle(backgroundColor: ColorComponents) async {
 }
 ```
 
-With `withCheckedContinuation` is one of a suite of standard library APIs that
-exist to make interfacing non-async and async code possible.
+The `withCheckedContinuation` function is one of a [suite of standard library
+APIs][continuation-apis] that exist to make interfacing non-async and async code possible.
 
 > Note: Introducing asynchronous code into a project can surface data isolation
 checking violations. To understand and address these, see [Crossing Isolation Boundaries][]
 
 [Crossing Isolation Boundaries]: commonproblems#Crossing-Isolation-Boundaries
+[continuation-apis]: https://developer.apple.com/documentation/swift/concurrency#continuations
 
 ## Dynamic Isolation
 
 Expressing the isolation of your program statically, using annotations and
-other language constructs, is a powerful way to ensure data race safety.
-But, because static isolation uses Swift's type system, it can potentially
-require changes all places a type or function is used.
+other language constructs, is both powerful and concise.
+But, because static isolation uses Swift's type system, introducing it
+can potentially require changes to all places a type is used.
 
-Dynamic isolation provides runtime mechanisms for expressing data isolation.
-These are much more manual, but provide a flexible alternative.
-This can be an essential tool for interfacing a Swift 6 component with another
-that has not yet migrated,
+Dynamic isolation provides runtime mechanisms for describing data isolation.
+These are a more manual, but also more flexible alternative.
+Dynamic isolation can be an essential tool for interfacing a Swift 6 component
+with another that has not yet migrated,
 even if these components are within the _same_ module.
 
 ### Internal-Only Isolation
@@ -77,9 +80,8 @@ class WindowStyler {
 
 This `MainActor` isolation may be _logically_ correct.
 But, if this type is used in other unmigrated locations,
-introducing static isolation here could require many additional changes.
-An alternative is to use dynamic isolation to help control the scope of the
-required changes.
+adding static isolation here could require many additional changes.
+An alternative is to use dynamic isolation to help control the scope.
 
 ```swift
 class WindowStyler {
@@ -95,18 +97,21 @@ class WindowStyler {
 ```
 
 Here, the isolation has been internalized into the class.
-This keeps any changes localized to the type, allowing you make any
-internal changes needed without affecting any clients of the type.
-A disadvantage of this technique is method arguments and return values might
-now need to cross otherwise-unnecessary isolation boundaries.
+This keeps any changes localized to the type, allowing you make
+changes without affecting any clients of the type.
+
+However, a disadvantage of this technique is now the type and its internals
+do not have the same isolation domain.
+This can result in non-`Sendable` method parameters or return values crossing
+otherwise-unnecessary isolation boundaries.
 
 ### Usage-Only Isolation
 
 If it is impractical to contain isolation exclusively within a type, you can
 instead expand the isolation to cover only its API usage.
 
-In this case, you can first apply static isolation to the type, and then use
-dynamic isolation at any usage locations:
+To do this, first apply static isolation to the type,
+and then use dynamic isolation at any usage locations:
 
 ```swift
 @MainActor
@@ -155,11 +160,11 @@ scope of changes gradual.
 
 It's important to keep in mind that static isolation, being part of the type
 system, affects your public API.
-You can migrate your own modules in a way that improves their APIs for Swift 6
-without breaking any existing clients.
+But, you can migrate your own modules in a way that improves their APIs for
+Swift 6 *without* breaking any existing clients.
 
 Suppose the `WindowStyler` is public API.
-You have determined that it really should be MainActor-isolated, but want to
+You have determined that it really should be `MainActor`-isolated, but want to
 ensure backwards compatibility for clients.
 
 ```swift
@@ -171,6 +176,8 @@ public class WindowStyler {
 
 Using `@preconcurrency` this way marks the isolation as conditional on the
 client module also having complete checking enabled.
+This preserves source compatibility with clients that have not yet begun
+adopting Swift 6.
 
 ## Dependencies
 
@@ -180,24 +187,50 @@ errors that are difficult or impossible to resolve.
 
 There are a number of different kinds of problems that result from using
 unmigrated code.
-
-Situations where `@preconcurrency` can help include:
+The `@preconcurrency` annotation can help with many of these situations:
 
 - [Non-Sendable types][]
 - Mismatches in [protocol-conformance isolation][]
 
-[Non-Sendable types]: 
+[Non-Sendable types]: commonproblems#Crossing-Isolation-Boundaries
+[protocol-conformance isolation]: commonproblems#Crossing-Isolation-Boundaries
 
-> Note: For more information, see [Crossing Isolation Boundaries][]
+## C/Objective-C
 
-[Crossing Isolation Boundaries]: commonproblems#Crossing-Isolation-Boundaries
+You can expose Swift concurrency support for your C and Objective-C APIs
+using annotations.
+This is made possible by Clang's
+[concurrency-specific annotations][clang-annotations]:
 
-An import annotated with `@preconcurrency` can downgrade diagnostics related
-to non-Sendable types within the module.
+[clang-annotations]: https://clang.llvm.org/docs/AttributeReference.html#customizing-swift-import
 
-It can downgrade isolation boundary checking problems, resolve
+```
+__attribute__((swift_attr(“@Sendable”)))
+__attribute__((swift_attr(“@_nonSendable”)))
+__attribute__((swift_attr("nonisolated")))
+__attribute__((swift_attr("@UIActor")))
 
-### Pre-Swift 6
+__attribute__((swift_async(none)))
+__attribute__((swift_async(not_swift_private, COMPLETION_BLOCK_INDEX))
+__attribute__((swift_async(swift_private, COMPLETION_BLOCK_INDEX)))
+__attribute__((__swift_async_name__(NAME)))
+__attribute__((swift_async_error(none)))
+__attribute__((__swift_attr__("@_unavailableFromAsync(message: \"" msg "\")")))
+```
 
-### C/Objective-C
+When working with a project that can import Foundation, the following
+annotation macros are available in `NSObjCRuntime.h`:
 
+```
+NS_SWIFT_SENDABLE
+NS_SWIFT_NONSENDABLE
+NS_SWIFT_NONISOLATED
+NS_SWIFT_UI_ACTOR
+
+NS_SWIFT_DISABLE_ASYNC
+NS_SWIFT_ASYNC(COMPLETION_BLOCK_INDEX)
+NS_REFINED_FOR_SWIFT_ASYNC(COMPLETION_BLOCK_INDEX)
+NS_SWIFT_ASYNC_NAME
+NS_SWIFT_ASYNC_NOTHROW
+NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
+```
