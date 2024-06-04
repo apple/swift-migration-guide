@@ -394,22 +394,6 @@ Here, a new type has been created that can satisfy the needed inheritance.
 Incorporating will be easiest if the conformance is only used internally by
 `Island`.
 
-> Link to "conformance proxy" code examples
-
-> Examples of diagnostics produced by the Swift 5.10 compiler for these issues include:  
->  
-> `Actor-isolated instance method '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `Main actor-isolated instance method '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `main actor-isolated property '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `actor-isolated property '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `main actor-isolated static property '_' cannot be used to satisfy nonisolated protocol requirement`  
->  
-> `main actor-isolated static method '_' cannot be used to satisfy nonisolated protocol requirement`  
-
 ## Crossing Isolation Boundaries
 
 Any value that needs to move from one isolation domain to another
@@ -471,8 +455,6 @@ Remember that `Sendable` is a guarantee of thread-safety, and part of a
 type's API contract.
 Removing the conformance is an API-breaking change.
 
-> Link to "making value types Sendable" code examples
-
 ### Preconcurrency Import
 
 Even if the type in another module is actually `Sendable`, it is not always
@@ -497,8 +479,6 @@ However, the compiler's behavior will be altered.
 When using the Swift 6 language mode, the produced here will be downgraded
 to a warning.
 The Swift 5 language mode will produce no diagnostics at all.
-
-> Link to "preconcurrency import" code examples
 
 ### Latent Isolation
 
@@ -542,8 +522,6 @@ removes the need for an asynchronous call.
 Fixing latent isolation issues can also potentially make further API
 simplification possible.
 
-> Link to "latent isolation" code examples
-
 Lack of `MainActor` isolation like this is, by far, the most common form of
 latent isolation.
 It is also very common for developers to hesitate to use this as a solution.
@@ -551,11 +529,6 @@ It is completely normal for programs with a user interface to have a large
 set of `MainActor`-isolated state.
 Concerns around long-running _synchronous_ work can often be addressed with
 just a handful of targeted `nonisolated` functions.
-
-> Note: To learn more about designing and controlling isolation,
-see [Isolation Granularity][]. (forthcoming)
-
-[Isolation Granularity]: #
 
 ### Computed Value
 
@@ -616,8 +589,6 @@ But further, data that is passed into or out of the actor may now itself
 need to cross the new isolation boundary.
 This can end up resulting in the need for yet more `Sendable` types.
 
-> Link to "actors" code examples
-
 #### Manual Synchronization
 
 If you have a type that is already doing manual synchronization, you can
@@ -638,8 +609,6 @@ As a general rule, if a type isn't already thread-safe, attempting to make
 it `Sendable` should not be your first approach.
 It is often much easier to try other techniques first, falling back to
 manual synchronization only when truly necessary.
-
-> Link to "manual synchronization" code examples
 
 #### Sendable Reference Types
 
@@ -666,8 +635,6 @@ final class Style: Sendable {
 Sometimes, this is a sign of a struct in disguise.
 But this can still be a useful technique when reference semantics need to be
 preserved, or for types that are part of a mixed Swift/Objective-C code base.
-
-> Link to "reference types" code examples
 
 ### Non-Isolated Initialization
 
