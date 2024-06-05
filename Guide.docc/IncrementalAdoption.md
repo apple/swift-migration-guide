@@ -28,6 +28,9 @@ func updateStyle(backgroundColor: ColorComponents, completionHandler: @escaping 
 
 This is an example of a function that informs a client its work is complete
 using a callback.
+There is no way for a caller to determine when or on what thread the callback
+will be invoked without consulting documentation.
+
 You can wrap this function up into an asynchronous version using
 _continuations_.
 
@@ -39,6 +42,15 @@ func updateStyle(backgroundColor: ColorComponents) async {
         }
     }
 }
+```
+
+With an asynchronous version, there is no longer any ambiguity.
+After the function has completed, execution will always resume in the same
+context it was started in.
+
+```swift
+await updateStyle(backgroundColor: color)
+// style has been updated
 ```
 
 The `withCheckedContinuation` function is one of a [suite of standard library
