@@ -38,14 +38,3 @@ public struct GloballyIsolatedColorComponents : Sendable {
 
 	public init() {}
 }
-
-public protocol Styling {
-    func updateStyle(completionHandler: () -> Void)
-}
-
-public class NonSendableThing {
-}
-
-public protocol MyProtocol {
-    func protocolRequirement(_ value: NonSendableThing)
-}
