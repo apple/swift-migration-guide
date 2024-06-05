@@ -1,13 +1,14 @@
 # Incremental Adoption
 
-Learn how you can introduce Swift currency features into your project
+Learn how you can introduce Swift concurrency features into your project
 incrementally.
 
-The Swift 6 language mode must be explicitly enabled for existing projects.
-However, enabling the mode is just the first part of the migration process.
-It could take many changes, across different modules to complete.
-To make this practical, these changes can be made _incrementally_.
-This allows you to progress without disrupting the entire project.
+Migrating projects towards the Swift 6 language mode is usually done in stages.
+In fact, many projects began the process before Swift 6 was even available.
+You can continue to introduce concurrency features _gradually_,
+addressing any problems that come up along the way.
+This allows you to make incremental progress without disrupting the
+entire project.
 
 Swift includes a number of language features and standard library APIs to help
 make incremental adoption easier.
