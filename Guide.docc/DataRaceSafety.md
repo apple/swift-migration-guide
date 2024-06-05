@@ -255,15 +255,15 @@ The Swift Programming Language.
 
 [Tasks]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Tasks-and-Task-Groups
 
-### Isolation Inheritance
+### Isolation Inference and Inheritance
 
 There are many ways to specify isolation explicitly.
 But, there are cases where the context of a declaration will establish isolation
-implicitly, via _isolation inheritance_.
+implicitly, via _isolation inference_.
 
 #### Classes
 
-A subclass will always inherit the isolation of its parent.
+A subclass will always have the same isolation as its parent.
 
 ```swift
 @MainActor
@@ -277,10 +277,10 @@ class Chicken: Animal {
 Because `Chicken` inherits from `Animal`, the static isolation of the `Animal`
 type also implicitly applies.
 Not only that, it also cannot be changed by a subclass.
-All `Animal` instances have been declared to be MainActor-isolated, which
+All `Animal` instances have been declared to be `MainActor`-isolated, which
 means all `Chicken` instances must be as well.
 
-The static isolation of a type will also be inherited by its properties and 
+The static isolation of a type will also be inferred for its properties and 
 methods by default.
 
 ```swift
@@ -302,8 +302,9 @@ The Swift Programming Language.
 
 #### Protocols
 
-A protocol conformance can implicitly affect isolation via inheritance.
-However, the protocol's effect on isolation depends on where its conformance is applied.
+A protocol conformance can implicitly affect isolation.
+However, the protocol's effect on isolation depends on how the conformance
+is applied.
 
 ```swift
 @MainActor
@@ -311,18 +312,18 @@ protocol Feedable {
     func eat(food: Pineapple)
 }
 
-// inherited isolation applies to the entire type
+// inferred isolation applies to the entire type
 class Chicken: Feedable {
 }
 
-// inherited isolation only applies within the extension
+// inferred isolation only applies within the extension
 extension Pirate: Feedable {
 }
 ```
 
 A protocol's requirements themselves can also be isolated.
-This can offer more fine-grained control around how conforming types inherit
-isolation.
+This can offer more fine-grained control around how isolation is inferred
+for conforming types.
 
 ```swift
 protocol Feedable {
@@ -333,7 +334,7 @@ protocol Feedable {
 
 Regardless of how a protocol is defined and conformance added, you cannot alter
 other mechanisms of static isolation.
-If a type is globally-isolated, either explicitly or via inheritance from a 
+If a type is globally-isolated, either explicitly or via inference from a 
 superclass, a protocol conformance cannot be used to change it.
 
 > Note: For more information, see the [Protocols][] section of
@@ -343,10 +344,11 @@ The Swift Programming Language.
 
 #### Function Types
 
-Isolation inheritance allows a type to implicitly define the isolation of
+Isolation _inference_ allows a type to implicitly define the isolation of
 its properties and methods.
 But these are all examples of _declarations_.
-It is also possible to achieve a similar effect with function _values_.
+It is also possible to achieve a similar effect with function values, though
+isolation _inheritance_.
 
 A closure can capture the isolation at its declaration site, instead of the
 isolation being statically defined by its type.
