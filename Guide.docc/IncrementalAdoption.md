@@ -66,13 +66,13 @@ checking violations. To understand and address these, see [Crossing Isolation Bo
 
 Expressing the isolation of your program statically, using annotations and
 other language constructs, is both powerful and concise.
-But, because static isolation uses Swift's type system, introducing it
-can potentially require changes to all places a type is used.
+But, it can be difficult to introduce static isolation without updating
+all dependencies simultaneously.
 
-Dynamic isolation provides runtime mechanisms for describing data isolation.
-These are a more manual, but also more flexible alternative.
-Dynamic isolation can be an essential tool for interfacing a Swift 6 component
-with another that has not yet migrated,
+Dynamic isolation provides runtime mechanisms you can use as a fallback for
+describing data isolation.
+It can be an essential tool for interfacing a Swift 6 component
+with another that has not yet been updated,
 even if these components are within the _same_ module.
 
 ### Internal-Only Isolation
