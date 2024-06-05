@@ -2,7 +2,8 @@ import Foundation
 
 /// An example of a struct with only `Sendable` properties.
 ///
-/// This type is implicitly-`Sendable` within its defining module.
+/// This type would be implicitly-`Sendable` within its defining module, but
+/// because it is public the `Sendable` conformance must be explicit.
 public struct ColorComponents {
     public let red: Float
     public let green: Float
