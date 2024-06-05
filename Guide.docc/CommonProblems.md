@@ -408,17 +408,15 @@ changed.
 
 Many value types consist entirely of `Sendable` properties.
 The compiler will treat types like this as implicitly `Sendable`, but _only_
-within their defining module.
+when they are non-public.
 
 ```swift
-// module A
 public struct ColorComponents {
     public let red: Float
     public let green: Float
     public let blue: Float
 }
 
-// module B
 @MainActor
 func applyBackground(_ color: ColorComponents) {
 }
@@ -428,8 +426,8 @@ func updateStyle(backgroundColor: ColorComponents) async {
 }
 ```
 
-Despite `ColorComponents` being implicitly `Sendable`, this extra-module usage
-will result in an error:
+Despite `ColorComponents` being eligible for an implicit `Sendable`
+conformance, this code will result in the following error:
 
 ```
  6 | 
