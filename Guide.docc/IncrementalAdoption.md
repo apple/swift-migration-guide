@@ -113,10 +113,12 @@ Here, the isolation has been internalized into the class.
 This keeps any changes localized to the type, allowing you make
 changes without affecting any clients of the type.
 
-However, a disadvantage of this technique is now the type and its internals
-do not have the same isolation domain.
-This can result in non-`Sendable` method parameters or return values crossing
-otherwise-unnecessary isolation boundaries.
+However, a major disadvantage of this technique is the type's true isolation
+requirements remain invisible.
+There is no way for clients to determine if or how they should change based on
+this public API.
+You should use this approach only as a temporary solution, and only when you
+have exhausted other options.
 
 ### Usage-Only Isolation
 
