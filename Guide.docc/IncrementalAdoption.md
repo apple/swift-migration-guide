@@ -146,28 +146,6 @@ class UIStyler {
 }
 ```
 
-A variant of this technique can also work in an asynchronous context.
-This is particularly helpful when you have a class that already has
-`async` methods, but hasn't yet established correct static isolation.
-
-```swift
-@MainActor
-class WindowStyler {
-    // ...
-}
-
-class UIStyler {
-    @MainActor
-    private let windowStyler = WindowStyler()
-
-    func updateStyle() async {
-        await MainActor.run {
-            windowStyler.applyStyle()
-        }
-    }
-}
-```
-
 Combining static and dynamic isolation can be a powerful tool to keep the
 scope of changes gradual.
 
