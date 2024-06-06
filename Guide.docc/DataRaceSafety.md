@@ -54,6 +54,9 @@ to express isolation requirements dynamically.
 Data isolation, be it static or dynamic, allows the
 compiler to guarantee Swift code you write is free of data races.
 
+> Note: For more information about using dynamic isolation,
+see <doc:IncrementalAdoption#Dynamic-Isolation>
+
 ### Isolation Domains
 
 Data isolation is the _mechanism_ used to protect shared mutable state.
