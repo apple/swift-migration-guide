@@ -702,3 +702,65 @@ class WindowStyler {
     }
 }
 ```
+
+### Non-Isolated Deinitialization
+
+By default, any custom initializers you write will have the same isolation as
+their enclosing scope.
+This is _not_ the case for deinitializers, which are always non-isolated.
+
+```swift
+@MainActor
+class WindowStyler {
+    // A MainActor-isolated type
+    private let store = StyleStore()
+
+    init {
+        // infers MainActor
+    }
+
+    deinit {
+        store.stopNotifications()
+    }
+}
+```
+
+This code produces the error:
+
+```
+error: call to main actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
+ 5 |     
+ 6 |     deinit {
+ 7 |         store.stopNotifications()
+   |               `- error: call to main actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
+ 8 |     }
+ 9 | }
+```
+
+While this might feel surprising, given that this type is `MainActor`-isolated,
+this is not a new constraint.
+The thread that executes a deinitializer has never been guaranteed and
+Swift's data isolation is now just surfacing that fact.
+
+Often, the work being done within the `deinit` does not need to be synchronous.
+A solution is to use an unstructured `Task` to first capture and
+then operate on the isolated values.
+When using this technique,
+it is _critical_ to ensure you do not capture `self`, even implicitly.
+
+```swift
+@MainActor
+class WindowStyler {
+    // A MainActor-isolated type
+    private let store = StyleStore()
+    
+    deinit {
+        Task { [store] in
+            await store.stopNotifications()
+        }
+    }
+}
+```
+
+> Important: **Never** extend the life-time of `self` from within
+`deinit`. Doing so will crash at runtime.
