@@ -32,7 +32,7 @@ public struct SendableColorComponents : Sendable {
 }
 
 @MainActor
-public struct GloballyIsolatedColorComponents : Sendable {
+public struct GlobalActorIsolatedColorComponents : Sendable {
 	public let red: Float = 1.0
 	public let green: Float = 1.0
 	public let blue: Float = 1.0

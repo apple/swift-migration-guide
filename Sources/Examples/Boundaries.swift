@@ -61,14 +61,14 @@ func computedValue_updateStyle(using backgroundColorProvider: @Sendable () -> Co
 }
 
 // MARK: Global Isolation
-/// An overload used by `globallyIsolated_updateStyle` to match types.
+/// An overload used by `globalActorIsolated_updateStyle` to match types.
 @MainActor
-func applyBackground(_ color: GloballyIsolatedColorComponents) {
+func applyBackground(_ color: GlobalActorIsolatedColorComponents) {
 }
 
 /// MainActor-isolated function that accepts non-`Sendable` parameters.
 @MainActor
-func globallyIsolated_updateStyle(backgroundColor: GloballyIsolatedColorComponents) async {
+func globalActorIsolated_updateStyle(backgroundColor: GlobalActorIsolatedColorComponents) async {
 	// This is safe because backgroundColor cannot change domains. It also
 	// now no longer necessary to await the call to `applyBackground`.
 	applyBackground(backgroundColor)
@@ -98,7 +98,7 @@ func exerciseBoundaryCrossingExamples() async {
 	})
 
 	print("  - using a globally-isolated type")
-	let components = await GloballyIsolatedColorComponents()
+	let components = await GlobalActorIsolatedColorComponents()
 
-	await globallyIsolated_updateStyle(backgroundColor: components)
+	await globalActorIsolated_updateStyle(backgroundColor: components)
 }
