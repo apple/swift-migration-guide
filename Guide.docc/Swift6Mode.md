@@ -28,6 +28,9 @@ invocation using the `-Xswiftc` flag:
 To change the language mode for package as a whole:
 
 ```swift
+// swift-tools-version:6.0
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
 let package = Package(
   name: "MyPackage",
   products: [
