@@ -2,8 +2,7 @@ import Foundation
 
 /// An example of a struct with only `Sendable` properties.
 ///
-/// This type would be implicitly-`Sendable` within its defining module, but
-/// because it is public the `Sendable` conformance must be explicit.
+/// This type is **not** Sendable because it is public. If we want a public type to be `Sendable`, we must annotate it explicitly.
 public struct ColorComponents {
 	public let red: Float
 	public let green: Float
