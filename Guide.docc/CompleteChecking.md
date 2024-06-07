@@ -65,7 +65,7 @@ in the Swift settings for a pre-Swift 6 language mode target:
 ```
 
 Targets that adopt the Swift 6 language mode have complete checking
-unconditionally enabled and do not require any settings changes.
+enabled unconditionally and do not require any settings changes.
 
 ## Using Xcode
 
