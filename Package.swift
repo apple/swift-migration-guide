@@ -24,10 +24,10 @@ let package = Package(
 		.target(
 			name: "Library"
 		),
-        .target(
-            name: "ObjCLibrary",
-            publicHeadersPath: "."
-        ),
+		.target(
+			name: "ObjCLibrary",
+			publicHeadersPath: "."
+		),
 		.executableTarget(
 			name: "Swift5Examples",
 			dependencies: ["Library"],

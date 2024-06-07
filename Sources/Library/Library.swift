@@ -5,21 +5,21 @@ import Foundation
 /// This type would be implicitly-`Sendable` within its defining module, but
 /// because it is public the `Sendable` conformance must be explicit.
 public struct ColorComponents {
-    public let red: Float
-    public let green: Float
-    public let blue: Float
+	public let red: Float
+	public let green: Float
+	public let blue: Float
 
-    public init(red: Float, green: Float, blue: Float) {
-        self.red = red
-        self.green = green
-        self.blue = blue
-    }
+	public init(red: Float, green: Float, blue: Float) {
+		self.red = red
+		self.green = green
+		self.blue = blue
+	}
 
-    public init() {
-        self.red = 1.0
-        self.green = 1.0
-        self.blue = 1.0
-    }
+	public init() {
+		self.red = 1.0
+		self.green = 1.0
+		self.blue = 1.0
+	}
 }
 
 /// Explicitly-Sendable variant of `ColorComponents`.
