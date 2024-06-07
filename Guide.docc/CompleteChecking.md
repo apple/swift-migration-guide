@@ -53,7 +53,7 @@ in the Swift settings for the given target:
 ```
 
 When using Swift 6.0 tools or later, use [`SwiftSetting.enableUpcomingFeature`](https://developer.apple.com/documentation/packagedescription/swiftsetting/enableupcomingfeature(_:_:))
-in the Swift settings for the given target:
+in the Swift settings for a pre-Swift 6 language mode target:
 
 ```swift
 .target(
@@ -63,6 +63,9 @@ in the Swift settings for the given target:
   ]
 )
 ```
+
+Targets that adopt the Swift 6 language mode have complete checking
+enabled unconditionally and do not require any settings changes.
 
 ## Using Xcode
 
