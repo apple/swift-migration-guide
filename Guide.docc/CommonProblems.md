@@ -278,11 +278,8 @@ protocol requirement with an isolated method:
 ```swift
 @MainActor
 class WindowStyler: Styler {
-    var showShadows: Bool = true
+    // matches, even though it is synchronous and actor-isolated
     func applyStyle() {
-        // implicit switch to the @MainActor before accessing main actor state
-
-        showShadows.toggle()
     }
 }
 ```
