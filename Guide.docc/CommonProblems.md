@@ -169,13 +169,13 @@ isolation domain. If the requirement is synchronous, it is invalid for
 a conforming type's implementation to access actor-isolated state:
 
 ```swift
-protocol Feedable {
-    func eat(food: Pineapple)
+protocol Styler {
+    func applyStyle()
 }
 
 @MainActor
-class Chicken: Feedable {
-    func eat(food: Pineapple) {
+class WindowStyler: Styler {
+    func applyStyle() {
         // access main-actor-isolated state
     }
 }
@@ -185,10 +185,10 @@ The above code produces the following error in Swift 6 mode:
 
 ```
  5 | @MainActor
- 6 | class Chicken: Feedable {
- 7 |     func eat(food: Pineapple) {
-   |          |- error: main actor-isolated instance method 'eat(food:)' cannot be used to satisfy nonisolated protocol requirement
-   |          `- note: add 'nonisolated' to 'eat(food:)' to make this instance method not isolated to the actor
+ 6 | class WindowStyler: Styler {
+ 7 |     func applyStyle() {
+   |          |- error: main actor-isolated instance method 'applyStyle()' cannot be used to satisfy nonisolated protocol requirement
+   |          `- note: add 'nonisolated' to 'applyStyle()' to make this instance method not isolated to the actor
  8 |         // access main-actor-isolated state
  9 |     }
 ```
@@ -201,14 +201,14 @@ will occur.
 ```swift
 // This really only makes sense to use from MainActor types, but
 // has not yet been updated to reflect that.
-protocol Feedable {
-    func eat(food: Pineapple)
+protocol Styler {
+    func applyStyle()
 }
 
 // A conforming type, which is now correctly isolated, has exposed 
 // a mismatch.
 @MainActor
-class Chicken: Feedable {
+class WindowStyler: Styler {
 }
 ```
 
@@ -222,14 +222,14 @@ There are two ways to isolate a protocol requirement to the main actor:
 ```swift
 // entire protocol
 @MainActor
-protocol Feedable {
-    func eat(food: Pineapple)
+protocol Styler {
+    func applyStyle()
 }
 
 // per-requirement
-protocol Feedable {
+protocol Styler {
     @MainActor
-    func eat(food: Pineapple)
+    func applyStyle()
 }
 ```
 
@@ -251,8 +251,8 @@ adding global actor isolation on a protocol using `@preconcurrency`:
 
 ```swift
 @preconcurrency @MainActor
-protocol Feedable {
-    func eat(food: Pineapple)
+protocol Styler {
+    func applyStyle()
 }
 ```
 
@@ -266,8 +266,8 @@ asynchronous offers a lot more flexibility over the isolation in
 conforming types.
 
 ```swift
-protocol Feedable {
-    func eat(food: Pineapple) async
+protocol Styler {
+    func applyStyle() async
 }
 ```
 
@@ -277,17 +277,17 @@ protocol requirement with an isolated method:
 
 ```swift
 @MainActor
-class Chicken: Feedable {
-    var isHungry: Bool = true
-    func eat(food: Pineapple) {
+class WindowStyler: Styler {
+    var showShadows: Bool = true
+    func applyStyle() {
         // implicit switch to the @MainActor before accessing main actor state
 
-        isHungry.toggle()
+        showShadows.toggle()
     }
 }
 ```
 
-The above code is safe, because generic code must always call `eat(food:)`
+The above code is safe, because generic code must always call `applyStyle()`
 asynchronously, allowing isolated implementations to switch actors before
 accessing actor-isolated state.
 
@@ -309,8 +309,8 @@ do own, but cannot easily change.
 
 ```swift
 @MainActor
-class Chicken: Feedable {
-    nonisolated func eat(food: Pineapple) {
+class WindowStyler: Styler {
+    nonisolated func applyStyle() {
         MainActor.assumeIsolated {
             // implementation body
         }
@@ -319,8 +319,8 @@ class Chicken: Feedable {
 
 // Improved ergonomics and safety with Swift 6's DynamicActorIsolation
 @MainActor
-class Chicken: @preconcurrency Feedable {
-    func eat(food: Pineapple) {
+class WindowStyler: @preconcurrency Styler {
+    func applyStyle() {
         // implementation body
     }
 }
@@ -346,8 +346,8 @@ Even a completely non-isolated function can still be useful.
 
 ```swift
 @MainActor
-class Chicken: Feedable {
-    nonisolated func eat(food: Pineapple) {
+class WindowStyler: Styler {
+    nonisolated func applyStyle() {
         // perhaps this implementation doesn't involve
         // other MainActor-isolated state
     }
@@ -364,32 +364,33 @@ instance-independent configuration.
 
 It could be possible to use an intermediate type to help address static
 isolation differences.
-This can be particularly effective if the protocol requires inheritance by its conforming types.
+This can be particularly effective if the protocol requires inheritance by its
+conforming types.
 
 ```swift
-class Animal {
+class UIStyler {
 }
 
-protocol Feedable: Animal {
-    func eat(food: Pineapple)
+protocol Styler: UIStyler {
+    func applyStyle()
 }
 
 // actors cannot have class-based inheritance
-actor Island: Feedable {
+actor WindowStyler: Styler {
 }
 ```
 
 Introducing a new type to conform indirectly can make this situation work.
-However, this solution will require some structural changes to `Island` that
-could spill out code that depends on it as well.
+However, this solution will require some structural changes to `WindowStyler`
+that could spill out code that depends on it as well.
 
 ```swift
-struct LivingIsland: Feedable {
-    func eat(food: Pineapple) {
+struct CustomWindowStyle: Styler {
+    func applyStyle() {
     }
 }
 ```
 
 Here, a new type has been created that can satisfy the needed inheritance.
 Incorporating will be easiest if the conformance is only used internally by
-`Island`.
+`WindowStyler`.
