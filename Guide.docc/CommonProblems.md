@@ -558,7 +558,7 @@ public struct ColorComponents {
 }
 ```
 
-By isolating this type to the `MainActor`, any accesses for other domains
+By isolating this type to the `MainActor`, any accesses from other isolation domains
 must be done asynchronously.
 This makes it possible to safely pass instances around across domains.
 
