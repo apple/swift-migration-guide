@@ -297,7 +297,7 @@ Together, these could require significant structural changes to address.
 This may still be the right solution, but the side-effects should be carefully
 considered first, even if only a small number of types are involved.
 
-#### Using Preconcurrency
+#### Preconcurrency Conformance
 
 Swift has a number of mechanisms to help you adopt concurrency incrementally
 and interoperate with code that has not yet begun using concurrency at all.
@@ -391,3 +391,331 @@ struct CustomWindowStyle: Styler {
 Here, a new type has been created that can satisfy the needed inheritance.
 Incorporating will be easiest if the conformance is only used internally by
 `WindowStyler`.
+
+## Crossing Isolation Boundaries
+
+Any value that needs to move from one isolation domain to another
+must either be `Sendable` or must preserve mutually exclusive access.
+Using values with types that do not satisfy these requirements in contexts
+that require them is a very common problem.
+And because libraries and frameworks may be updated to use Swift's
+concurrency features, these issues can come up even when your code hasn't
+changed.
+
+### Implicitly-Sendable Types
+
+Many value types consist entirely of `Sendable` properties.
+The compiler will treat types like this as implicitly `Sendable`, but _only_
+when they are non-public.
+
+```swift
+public struct ColorComponents {
+    public let red: Float
+    public let green: Float
+    public let blue: Float
+}
+
+@MainActor
+func applyBackground(_ color: ColorComponents) {
+}
+
+func updateStyle(backgroundColor: ColorComponents) async {
+    await applyBackground(backgroundColor)
+}
+```
+
+A `Sendable` conformance is part of a type's public API contract,
+and that is up to you to define.
+Because `ColorComponents` is marked `public` it will not have an implicit
+conformance to `Sendable`.
+This will result in the following error:
+
+```
+ 6 | 
+ 7 | func updateStyle(backgroundColor: ColorComponents) async {
+ 8 |     await applyBackground(backgroundColor)
+   |           |- error: sending 'backgroundColor' risks causing data races
+   |           `- note: sending task-isolated 'backgroundColor' to main actor-isolated global function 'applyBackground' risks causing data races between main actor-isolated and task-isolated uses
+ 9 | }
+10 | 
+```
+
+A very straightforward solution is just to make the type's `Sendable`
+conformance explicit.
+
+```swift
+public struct ColorComponents: Sendable {
+    // ...
+}
+```
+
+Even when trivial, adding a `Sendable` conformance should always be
+done with care.
+Remember that `Sendable` is a guarantee of thread-safety, and part of a
+type's API contract.
+Removing the conformance is an API-breaking change.
+
+### Preconcurrency Import
+
+Even if the type in another module is actually `Sendable`, it is not always
+possible to modify its definition.
+In this case, you can use a `@preconcurrency import` to suppress errors until
+the library is updated.
+
+```swift
+// ColorComponents defined here
+@preconcurrency import UnmigratedModule
+
+func updateStyle(backgroundColor: ColorComponents) async {
+    // crossing an isolation domain here
+    await applyBackground(backgroundColor)
+}
+```
+
+With the addition of this `@preconcurrency import`,
+`ColorComponents` remains non-`Sendable`.
+However, the compiler's behavior will be altered.
+When using the Swift 6 language mode, the produced here will be downgraded
+to a warning.
+The Swift 5 language mode will produce no diagnostics at all.
+
+### Latent Isolation
+
+Sometimes the _apparent_ need for a `Sendable` type can actually be the
+symptom of a more fundamental isolation problem.
+The only reason a type needs to be `Sendable` is to cross isolation boundaries.
+If you can avoid crossing boundaries altogether, the result can
+often be both simpler and a better reflection of the true nature of your
+system.
+
+```swift
+@MainActor
+func applyBackground(_ color: ColorComponents) {
+}
+
+func updateStyle(backgroundColor: ColorComponents) async {
+    await applyBackground(backgroundColor)
+}
+```
+
+The `updateStyle(backgroundColor:)` function is non-isolated.
+This means that its non-`Sendable` parameter is also non-isolated.
+But, it is immediately crossing from this non-isolated domain to the
+`MainActor` when `applyBackground(_:)` is called.
+
+Since `updateStyle(backgroundColor:)` is working directly with
+`MainActor`-isolated functions and non-`Sendable` types,
+just applying `MainActor` isolation may be more appropriate.
+
+```swift
+@MainActor
+func updateStyle(backgroundColor: ColorComponents) async {
+    applyBackground(backgroundColor)
+}
+```
+
+Now, there is no longer an isolation boundary for the non-`Sendable` type to
+cross.
+And in this case, not only does this resolve the problem, it also
+removes the need for an asynchronous call.
+Fixing latent isolation issues can also potentially make further API
+simplification possible.
+
+Lack of `MainActor` isolation like this is, by far, the most common form of
+latent isolation.
+It is also very common for developers to hesitate to use this as a solution.
+It is completely normal for programs with a user interface to have a large
+set of `MainActor`-isolated state.
+Concerns around long-running _synchronous_ work can often be addressed with
+just a handful of targeted `nonisolated` functions.
+
+### Computed Value
+
+Instead of trying to pass a non-`Sendable` type across a boundary, it may be
+possible to use a `Sendable` function that creates the needed values.
+
+```swift
+func updateStyle(backgroundColorProvider: @Sendable () -> ColorComponents) async {
+    await applyBackground(using: backgroundColorProvider)
+}
+```
+
+Here, it does not matter than `ColorComponents` is not `Sendable`.
+By using `@Sendable` function that can compute the value, the lack of
+sendability is side-stepped entirely.
+
+### Sendable Conformance
+
+When encountering problems related to crossing isolation domains, a very
+natural reaction is to just try to add a conformance to `Sendable`.
+You can make a type `Sendable` in four ways.
+
+#### Global Isolation
+
+Adding global isolation to any type will make it implicitly `Sendable`.
+
+```swift
+@MainActor
+public struct ColorComponents {
+    // ...
+}
+```
+
+By isolating this type to the `MainActor`, any accesses from other isolation domains
+must be done asynchronously.
+This makes it possible to safely pass instances around across domains.
+
+#### Actors
+
+Actors have an implicit `Sendable` conformance because their properties are
+protected by actor isolation.
+
+```swift
+actor Style {
+    private var background: ColorComponents
+}
+```
+
+In addition to gaining a `Sendable` conformance, actors have their own
+isolation domain.
+This allows them to freely work with other non-`Sendable` types internally.
+This can be a major advantage, but does come with trade-offs.
+
+Because an actor's isolated methods all must be asynchronous,
+sites that access the type may now require an async context.
+This alone is a reason to make such a change with care.
+But further, data that is passed into or out of the actor may now itself
+need to cross the new isolation boundary.
+This can end up resulting in the need for yet more `Sendable` types.
+
+#### Manual Synchronization
+
+If you have a type that is already doing manual synchronization, you can
+express this to the compiler by marking your `Sendable` conformance as
+`unchecked`.
+
+```swift
+class Style: @unchecked Sendable {
+    private var background: ColorComponents
+    private let queue: DispatchQueue
+}
+```
+
+You should not feel compelled to remove use of queues, locks, or other
+forms of manual synchronization to integrate with Swift's concurrency system.
+However, most types are not inherently thread-safe.
+As a general rule, if a type isn't already thread-safe, attempting to make
+it `Sendable` should not be your first approach.
+It is often much easier to try other techniques first, falling back to
+manual synchronization only when truly necessary.
+
+#### Sendable Reference Types
+
+It is possible for reference types to be validated as `Sendable` without
+the `unchecked` qualifier.
+But, this can only be done under very narrow circumstances.
+
+To allow a checked `Sendable` conformance a class:
+
+- Must be `final`
+- Cannot inherit from another class other than `NSObject`
+- Cannot have any non-isolated mutable properties
+
+```swift
+public struct ColorComponents: Sendable {
+    // ...
+}
+
+final class Style: Sendable {
+    private let background: ColorComponents
+}
+```
+
+Sometimes, this is a sign of a struct in disguise.
+But this can still be a useful technique when reference semantics need to be
+preserved, or for types that are part of a mixed Swift/Objective-C code base.
+
+#### Using Composition
+
+You do not need to select one single technique for making a reference type
+`Sendable.`
+One type can use many techniques internally.
+
+```swift
+final class Style: Sendable {
+    private nonisolated(unsafe) var background: ColorComponents
+    private let queue: DispatchQueue
+
+    @MainActor
+    private var foreground: ColorComponents
+}
+```
+
+The `background` property is protected by manual synchronization,
+while the `foreground` property uses actor isolation.
+Combining these two techniques results in a type that better describes its
+internal semantics.
+And by doing this, the type can now continue to take advantage of the
+compiler's automated isolation checking.
+
+### Non-Isolated Initialization
+
+Actor-isolated types can present a problem when they have to be initialized in
+a non-isolated context.
+This occurs frequently when the type is used in a default value expression or
+as a property initializer.
+
+> Note: These problems could also be a symptom of
+[latent isolation](#Latent-Isolation) or an
+[under-specified protocol](#Under-Specified-Protocol).
+
+Here the non-isolated `Stylers` type is making a call to a
+`MainActor`-isolated initializer.
+
+```swift
+@MainActor
+class WindowStyler {
+    init() {
+    }
+}
+
+struct Stylers {
+    static let window = WindowStyler()
+}
+```
+
+This code results in the following error:
+
+```
+ 7 | 
+ 8 | struct Stylers {
+ 9 |     static let window = WindowStyler()
+   |                `- error: main actor-isolated default value in a nonisolated context
+10 | }
+11 | 
+```
+
+Globally-isolated types sometimes don't actually need to reference any global
+actor state in their initializers.
+By making the `init` method `nonisolated`, it is free to be called from any
+isolation domain.
+This remains safe as the compiler still guarantees that any state that *is*
+isolated will only be accessible from the `MainActor`.
+
+```swift
+@MainActor
+class WindowStyler {
+    private var viewStyler = ViewStyler()
+    private var primaryStyleName: String
+
+    nonisolated init(name: String) {
+        self.primaryStyleName = name
+        // type is fully-initialized here
+    }
+}
+```
+
+
+All `Sendable` properties can still be safely accessed in this `init` method.
+And while any non-`Sendable` properties cannot,
+they can still be initialized by using default expressions.
