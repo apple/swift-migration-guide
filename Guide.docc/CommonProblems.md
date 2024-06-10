@@ -304,17 +304,10 @@ and interoperate with code that has not yet begun using concurrency at all.
 These tools can be helpful both for code you do not own, as well as code you
 do own, but cannot easily change.
 
-```swift
-@MainActor
-class WindowStyler: Styler {
-    nonisolated func applyStyle() {
-        MainActor.assumeIsolated {
-            // implementation body
-        }
-    }
-}
+Annotating a protocol conformance with `@preconcurrency` makes it possible to
+suppress errors about any isolation mismatches.
 
-// Improved ergonomics and safety with Swift 6's DynamicActorIsolation
+```swift
 @MainActor
 class WindowStyler: @preconcurrency Styler {
     func applyStyle() {
@@ -323,12 +316,13 @@ class WindowStyler: @preconcurrency Styler {
 }
 ```
 
-This technique involves two steps.
-It first removes any static isolation that is causing the mismatch.
-Then, it re-introduces the isolation dynamically, to allow useful
-work within the function body.
-This keeps the solution localized to the source of the compiler error.
-It is also a great option for making isolation changes incrementally.
+This inserts runtime checks to ensure that that static isolation
+of the conforming class is always enforced.
+
+> Note: To learn more about incremental adoption and dynamic isolation,
+see [Dynamic Isolation][]
+
+[Dynamic Isolation]: incrementaladoption#Dynamic-Isolation
 
 ### Isolated Conforming Type
 
