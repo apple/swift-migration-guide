@@ -395,9 +395,9 @@ Incorporating will be easiest if the conformance is only used internally by
 ## Crossing Isolation Boundaries
 
 Any value that needs to move from one isolation domain to another
-must be `Sendable`.
-Using non-`Sendable` values in contexts that require `Sendable` types is a very
-common problem.
+must either be `Sendable` or must preserve mutually exclusive access.
+Using values with types that do not satisfy these requirements in contexts
+that require them is a very common problem.
 And because libraries and frameworks may be updated to use Swift's
 concurrency features, these issues can come up even when your code hasn't
 changed.
@@ -424,8 +424,11 @@ func updateStyle(backgroundColor: ColorComponents) async {
 }
 ```
 
-Despite `ColorComponents` being eligible for an implicit `Sendable`
-conformance, this code will result in the following error:
+A `Sendable` conformance is part of a type's public API contract,
+and that is up to you to define.
+Because `ColorComponents` is marked `public` it will not have an implicit
+conformance to `Sendable`.
+This will result in the following error:
 
 ```
  6 | 
@@ -436,6 +439,7 @@ conformance, this code will result in the following error:
  9 | }
 10 | 
 ```
+
 A very straightforward solution is just to make the type's `Sendable`
 conformance explicit.
 
@@ -455,9 +459,8 @@ Removing the conformance is an API-breaking change.
 
 Even if the type in another module is actually `Sendable`, it is not always
 possible to modify its definition.
-It also could be that the type is not `Sendable`, but depends on client
-cooperation for safe usage.
-In these cases, you can use a `@preconcurrency import` to address errors.
+In this case, you can use a `@preconcurrency import` to suppress errors until
+the library is updated.
 
 ```swift
 // ColorComponents defined here
@@ -564,8 +567,8 @@ This makes it possible to safely pass instances around across domains.
 
 #### Actors
 
-A reference type can be made `Sendable` by changing it from a `class`
-to an `actor`.
+Actors have an implicit `Sendable` conformance because their properties are
+protected by actor isolation.
 
 ```swift
 actor Style {
@@ -616,7 +619,7 @@ To allow a checked `Sendable` conformance a class:
 
 - Must be `final`
 - Cannot inherit from another class other than `NSObject`
-- Cannot have any mutable properties
+- Cannot have any non-isolated mutable properties
 
 ```swift
 public struct ColorComponents: Sendable {
@@ -631,6 +634,29 @@ final class Style: Sendable {
 Sometimes, this is a sign of a struct in disguise.
 But this can still be a useful technique when reference semantics need to be
 preserved, or for types that are part of a mixed Swift/Objective-C code base.
+
+#### Using Composition
+
+You do not need to select one single technique for making a reference type
+`Sendable.`
+One type can use many techniques internally.
+
+```swift
+final class Style: Sendable {
+    private nonisolated(unsafe) var background: ColorComponents
+    private let queue: DispatchQueue
+
+    @MainActor
+    private var foreground: ColorComponents
+}
+```
+
+The `background` property is protected by manual synchronization,
+while the `foreground` property uses actor isolation.
+Combining these two techniques results in a type that better describes its
+internal semantics.
+And by doing this, the type can now continue to take advantage of the
+compiler's automated isolation checking.
 
 ### Non-Isolated Initialization
 
@@ -671,32 +697,25 @@ This code results in the following error:
 
 Globally-isolated types sometimes don't actually need to reference any global
 actor state in their initializers.
-
-```swift
-@MainActor
-class WindowStyler {
-    nonisolated init() {
-    }
-}
-```
-
 By making the `init` method `nonisolated`, it is free to be called from any
 isolation domain.
 This remains safe as the compiler still guarantees that any state that *is*
 isolated will only be accessible from the `MainActor`.
 
-Most types like this will have isolated properties.
-But, this technique can still potentially be used, if the 
-properties themselves can be initialized using default expressions.
-
 ```swift
 @MainActor
 class WindowStyler {
-    // also MainActor-isolated
-    private var windowCount = 1
+    private var viewStyler = ViewStyler()
+    private var primaryStyleName: String
 
-    nonisolated init() {
-        // type is still fully-initialized here
+    nonisolated init(name: String) {
+        self.primaryStyleName = name
+        // type is fully-initialized here
     }
 }
 ```
+
+
+All `Sendable` properties can still be safely accessed in this `init` method.
+And while any non-`Sendable` properties cannot,
+they can still be initialized by using default expressions.
