@@ -3,25 +3,24 @@
 Learn about the fundamental concepts Swift uses to enable data-race-free
 concurrent code.
 
-Traditionally, mutable state had to be manually protected via careful runtime
-synchronization.
-Using tools such as locks and queues, the prevention of data races was
-entirely up to the programmer. This is notoriously difficult
-not just to do correctly, but also to keep correct over time.
-Even determining the _need_ for synchronization may be challenging.
-Worst of all, unsafe code does not guarantee failure at runtime.
-This code can often frequently seem to work, possibly requiring highly unusual
-conditions to exhibit the incorrect and unpredictable behavior characteristic
-of a data race.
+Concurrent programming is important in modern software development for
+improving responsiveness and leveraging multicore processors through
+parallelization. Concurrent code is also a notorious source of difficult
+runtime bugs known as _data races_. Data-race safety is critical for taking
+full advantage of concurrency without the risk of introducing hard-to-debug
+runtime failures into your code.
 
-More formally, a data race occurs when one thread accesses memory while the
-same memory is being mutated by another thread.
-The Swift 6 language mode eliminates these problems by preventing data races
-at compile time.
+A data race occurs when one thread accesses memory while the same memory is
+being mutated by another thread. Before Swift 6, shared state had to be
+manually protected through careful runtime synchronization using tools such as
+locks and queues, leaving prevention of data races entirely up to the
+programmer. This is difficult to write correctly and to maintain as code
+evolves over time. When the programmer makes a mistake that leads to a data
+race, the behavior of the code at runtime is unpredictable, making data races
+exceptionally difficult to reproduce, debug, and fix.
 
-> Important: You may have encountered constructs like `async`/`await`
-and actors in other languages. Pay extra attention, as similarities to
-these concepts in Swift may only be superficial.
+The Swift 6 language mode defines away data races at compile time by
+identifying and diagnosing risk of concurrent access to shared state.
 
 ## Data Isolation
 
