@@ -23,7 +23,7 @@ Adopting the Swift 6 language mode is entirely under your control
 on a per-target basis.
 Targets that build with previous modes, as well as code in other
 languages exposed to Swift, can all interoperate with
-modules that have been migrated to the latest mode.
+modules that have been migrated to the Swift 6 language mode.
 
 It is possible you have been incrementally adopting concurrency features
 as they were introduced.
