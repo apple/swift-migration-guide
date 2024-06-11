@@ -722,21 +722,15 @@ they can still be initialized by using default expressions.
 
 ### Non-Isolated Deinitialization
 
-By default, any custom initializers you write will have the same isolation as
-their enclosing scope.
-This is _not_ the case for deinitializers, which are always non-isolated.
+Even if a type has actor isolation, deinitializers are _always_ non-isolated.
 
 ```swift
-@MainActor
-class WindowStyler {
-    // A MainActor-isolated type
+actor BackgroundStyler {
+    // another actor-isolated type
     private let store = StyleStore()
 
-    init {
-        // infers MainActor
-    }
-
     deinit {
+        // this is non-isolated
         store.stopNotifications()
     }
 }
@@ -745,16 +739,16 @@ class WindowStyler {
 This code produces the error:
 
 ```
-error: call to main actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
- 5 |     
- 6 |     deinit {
+error: call to actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
+ 5 |     deinit {
+ 6 |         // this is non-isolated
  7 |         store.stopNotifications()
-   |               `- error: call to main actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
+   |               `- error: call to actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
  8 |     }
  9 | }
 ```
 
-While this might feel surprising, given that this type is `MainActor`-isolated,
+While this might feel surprising, given that this type is an actor,
 this is not a new constraint.
 The thread that executes a deinitializer has never been guaranteed and
 Swift's data isolation is now just surfacing that fact.
@@ -766,12 +760,12 @@ When using this technique,
 it is _critical_ to ensure you do not capture `self`, even implicitly.
 
 ```swift
-@MainActor
-class WindowStyler {
-    // A MainActor-isolated type
+actor BackgroundStyler {
+    // another actor-isolated type
     private let store = StyleStore()
 
     deinit {
+        // no actor isolation here, so none will be inherited by the task
         Task { [store] in
             await store.stopNotifications()
         }
