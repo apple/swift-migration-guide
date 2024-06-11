@@ -719,3 +719,59 @@ class WindowStyler {
 All `Sendable` properties can still be safely accessed in this `init` method.
 And while any non-`Sendable` properties cannot,
 they can still be initialized by using default expressions.
+
+### Non-Isolated Deinitialization
+
+Even if a type has actor isolation, deinitializers are _always_ non-isolated.
+
+```swift
+actor BackgroundStyler {
+    // another actor-isolated type
+    private let store = StyleStore()
+
+    deinit {
+        // this is non-isolated
+        store.stopNotifications()
+    }
+}
+```
+
+This code produces the error:
+
+```
+error: call to actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
+ 5 |     deinit {
+ 6 |         // this is non-isolated
+ 7 |         store.stopNotifications()
+   |               `- error: call to actor-isolated instance method 'stopNotifications()' in a synchronous nonisolated context
+ 8 |     }
+ 9 | }
+```
+
+While this might feel surprising, given that this type is an actor,
+this is not a new constraint.
+The thread that executes a deinitializer has never been guaranteed and
+Swift's data isolation is now just surfacing that fact.
+
+Often, the work being done within the `deinit` does not need to be synchronous.
+A solution is to use an unstructured `Task` to first capture and
+then operate on the isolated values.
+When using this technique,
+it is _critical_ to ensure you do not capture `self`, even implicitly.
+
+```swift
+actor BackgroundStyler {
+    // another actor-isolated type
+    private let store = StyleStore()
+
+    deinit {
+        // no actor isolation here, so none will be inherited by the task
+        Task { [store] in
+            await store.stopNotifications()
+        }
+    }
+}
+```
+
+> Important: **Never** extend the life-time of `self` from within
+`deinit`. Doing so will crash at runtime.
