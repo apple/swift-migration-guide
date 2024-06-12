@@ -289,8 +289,8 @@ await withTaskGroup(of: Something.self) { group in
             group.addTask { // or 'addTaskUnlessCancelled'
                 await remainingWorkItem.work() 
             }  
+            submittedWork += 1
         }
-        submittedWork += 1
     }
 }
 ```
