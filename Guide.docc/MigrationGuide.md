@@ -47,6 +47,11 @@ and _language mode_.
 The Swift 6 compiler supports four distinct language modes: "6", "5", "4.2",
 and "4".
 
+> Note: This guide is under active development. You can view the source, see
+full code examples, and learn about how to contribute in the [repository][].
+
+[repository]: https://github.com/apple/swift-migration-guide
+
 ## Topics
 
 - <doc:DataRaceSafety>
