@@ -39,6 +39,5 @@ let package = Package(
             name: "Swift6Examples",
             dependencies: ["Library"]
         )
-    ],
-    swiftLanguageVersions: [.v6]
+    ]
 )

@@ -25,32 +25,34 @@ invocation using the `-Xswiftc` flag:
 
 ### Package manifest
 
-To change the language mode for package as a whole:
+A `Package.swift` file that uses `swift-tools-version` of `6.0` will enable
+the Swift 6 language mode for all targets.
+You can still set the language mode for the package as a whole using the 
+`swiftLanguageVersions` property of `Package`.
+However, you can now also change the language mode as needed on a
+per-target basis using the new `swiftLanguageVersion` build setting:
 
 ```swift
-// swift-tools-version:6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.0
 
 let package = Package(
-  name: "MyPackage",
-  products: [
-    // ...
-  ],
-  targets: [
-    // ...
-  ],
-  swiftLanguageVersions: [.v6]
-)
-```
-
-To change the language mode on a per-target basis:
-
-```swift
-.target(
-  name: "MyTarget",
-  swiftSettings: [
-    .swiftLanguageVersion(.v6)
-  ]
+    name: "MyPackage",
+    products: [
+        // ...
+    ],
+    targets: [
+        // Uses the default tools language mode
+        .target(
+            name: "FullyMigrated",
+        ),
+        // Still requires 5
+        .target(
+            name: "NotQuiteReadyYet",
+            swiftSettings: [
+                .swiftLanguageVersion(.v5)
+            ]
+        )
+    ]
 )
 ```
 
