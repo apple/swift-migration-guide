@@ -30,7 +30,7 @@ without any help from the compiler.
 ### Sendable Types
 
 ```swift
-var islandsInTheSea = 42
+var supportedStyleCount = 42
 ```
 
 Here, we have defined a global variable.
@@ -39,31 +39,31 @@ isolation domain. Compiling the above code in Swift 6 mode
 produces an error message:
 
 ```
-1 | var islandsInTheSea = 42
-  |              |- error: global variable 'islandsInTheSea' is not concurrency-safe because it is non-isolated global shared mutable state
-  |              |- note: convert 'islandsInTheSea' to a 'let' constant to make the shared state immutable
-  |              |- note: restrict 'islandsInTheSea' to the main actor if it will only be accessed from the main thread
-  |              |- note: unsafely mark 'islandsInTheSea' as concurrency-safe if all accesses are protected by an external synchronization mechanism
+1 | var supportedStyleCount = 42
+  |              |- error: global variable 'supportedStyleCount' is not concurrency-safe because it is non-isolated global shared mutable state
+  |              |- note: convert 'supportedStyleCount' to a 'let' constant to make the shared state immutable
+  |              |- note: restrict 'supportedStyleCount' to the main actor if it will only be accessed from the main thread
+  |              |- note: unsafely mark 'supportedStyleCount' as concurrency-safe if all accesses are protected by an external synchronization mechanism
 2 |
 ```
 
 Two functions with different isolation domains accessing this
-variable risks a data race. In the following code, `printIslands()`
+variable risks a data race. In the following code, `printSupportedStyles()`
 could be running on the main actor concurrently with a call to
-`addIsland()` from another isolation domain:
+`addNewStyle()` from another isolation domain:
 
 ```swift
 @MainActor
-func printIslands() {
-    print("Islands in the sea of concurrency: ", islandsInTheSea)
+func printSupportedStyles() {
+    print("Supported styles: ", supportedStyleCount)
 }
 
-func addIsland() {
-    let island = Island()
+func addNewStyle() {
+    let style = Style()
 
-    islandsInTheSea += 1
+    supportedStyleCount += 1
 
-    addToMap(island)
+    storeStyle(style)
 }
 ```
 
@@ -71,12 +71,12 @@ One way to address the problem is by changing variable's isolation.
 
 ```swift
 @MainActor
-var islandsInTheSea = 42
+var supportedStyleCount = 42
 ```
 
 The variable remains mutable, but has been isolated to a global actor.
 All accesses can now only happen in one isolation domain, and the synchronous
-access within `addIsland` would be invalid at compile time.
+access within `addNewStyle` would be invalid at compile time.
 
 If the variable is meant to be constant and is never mutated,
 a straight-forward solution is to express this to the compiler.
@@ -84,16 +84,16 @@ By changing the `var` to a `let`, the compiler can statically
 disallow mutation, guaranteeing safe read-only access.
 
 ```swift
-let islandsInTheSea = 42
+let supportedStyleCount = 42
 ```
 
 If there is synchronization in place that protects this variable in a way that
 is invisible to the compiler, you can disable all isolation checking for
-`islandsInTheSea` using the `nonisolated(unsafe)` keyword:
+`supportedStyleCount` using the `nonisolated(unsafe)` keyword:
 
 ```swift
-/// This value is only ever accessed while holding `islandLock`.
-nonisolated(unsafe) var islandsInTheSea = 42
+/// This value is only ever accessed while holding `styleLock`.
+nonisolated(unsafe) var supportedStyleCount = 42
 ```
 
 Only use `nonisolated(unsafe)` when you are carefully guarding all access to
@@ -108,36 +108,35 @@ Global _reference_ types present an additional challenge, because they
 are typically not `Sendable`.
 
 ```swift
-class Chicken {
-    let name: String
-    var currentHunger: HungerLevel
+class WindowStyler {
+    var background: ColorComponents
 
-    static let prizedHen = Chicken()
+    static let defaultStyler = WindowStyler()
 }
 ```
 
 The problem with this `static let` declaration is not related to the
 mutability of the variable.
-The issue is `Chicken` is a non-Sendable type, making its internal state
+The issue is `WindowStyler` is a non-`Sendable` type, making its internal state
 unsafe to share across isolation domains.
 
 ```swift
-func feedPrizedHen() {
-    Chicken.prizedHen.currentHunger = .wellFed
+func resetDefaultStyle() {
+    WindowStyler.defaultStyler.background = ColorComponents(red: 1.0, green: 1.0, blue: 1.0)
 }
 
 @MainActor
-class ChickenValley {
-    var flock: [Chicken]
+class StyleStore {
+    var stylers: [WindowStyler]
 
-    func compareHunger() -> Bool {
-        flock.contains { $0.currentHunger > Chicken.prizedHen.currentHunger }
+    func hasDefaultBackground() -> Bool {
+        stylers.contains { $0.background == WindowStyler.defaultStyler.background }
     }
 }
 ```
 
 Here, we see two functions that could access the internal state of the
-`Chicken.prizedHen` concurrently.
+`WindowStyler.defaultStyler` concurrently.
 The compiler only permits these kinds of cross-isolation accesses with
 `Sendable` types.
 One option is to isolate the variable to a single domain using a global actor.
