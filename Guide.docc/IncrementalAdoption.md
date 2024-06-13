@@ -149,6 +149,60 @@ class UIStyler {
 Combining static and dynamic isolation can be a powerful tool to keep the
 scope of changes gradual.
 
+## Missing Annotations
+
+Dynamic isolation gives you tools to express isolation at runtime.
+But, you may also find you need to describe other concurrency properties
+that are missing from unmigrated modules.
+
+### Unmarked Sendable Closures
+
+A callback that is missing a `Sendable` annotation can be a problem when
+combined with actor-isolated types.
+
+```swift
+@MainActor
+class PersonalTransportation {
+    func configure() {
+        // This function is missing a Sendable annotation
+        JPKJetPack.jetPackConfiguration {
+            // MainActor isolation will be inferred here, incorrectly
+            self.applyConfiguration()
+        }
+    }
+
+    func applyConfiguration() {
+    }
+}
+```
+
+If `jetPackConfiguration` can invoke its closure in another isolation domain,
+it must be marked `@Sendable`.
+When an un-migrated module hasn't yet done this, it will result in incorrect
+actor inference.
+The above code, which does contain dynamic isolation verification checks,
+will compile without issue but crash at runtime.
+
+To workaround this, you can manually annotate the closure with `@Sendable.`
+This will prevent the compiler from inferring `MainActor` isolation.
+Because the compiler now knows actor isolation could change,
+it will require at await at the callsite to ensure correct isolation.
+
+```swift
+@MainActor
+class PersonalTransportation {
+    func configure() {
+        JPKJetPack.jetPackConfiguration { @Sendable in
+            // Sendable closures do not infer actor isolation
+            await self.applyConfiguration()
+        }
+    }
+
+    func applyConfiguration() {
+    }
+}
+```
+
 ## Backwards Compatibility
 
 It's important to keep in mind that static isolation, being part of the type
