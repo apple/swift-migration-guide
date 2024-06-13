@@ -24,6 +24,10 @@ let package = Package(
         .target(
             name: "Library"
         ),
+        .testTarget(
+            name: "LibraryXCTests",
+            dependencies: ["ObjCLibrary", "Library"]
+        ),
         .target(
             name: "ObjCLibrary",
             publicHeadersPath: "."
