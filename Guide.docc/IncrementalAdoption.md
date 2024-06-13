@@ -227,3 +227,94 @@ NS_SWIFT_ASYNC_NAME
 NS_SWIFT_ASYNC_NOTHROW
 NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
+
+### Dealing with wrongly annotated callbacks from Objective-C
+
+While the SDKs and other objective-c libraries make progress in adopting Swift concurrency,
+they will often go through the exercise of codifying contracts which were only explained in
+documentation, like "this will always be called on the main thread", and turn them intro 
+compile and runtime enforced isolation checks that Swift will then perform when you adopt such APIs.
+
+For example, the fictional `NSJetPack` protocol generally invokes all of its delegate methods
+on the main thread, and is MainActor-isolated. The SDK author therefore annotates the type like this:
+
+```swift
+NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
+@protocol NSJetPack // fictional protocol
+  // ...
+@end
+```
+
+As such, all member methods of this protocol inherit the `@MainActor` annotation, and for most methods this is correct.
+However, in this example, let us consider a method which was previously documented as follows:
+
+```swift
+NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
+@protocol NSJetPack // fictional protocol
+/* Return YES if this jetpack supports flying at really high altitude!
+ 
+ JetPackKit invokes this method at a variety of times, and not always on the main thread. For example, ...
+*/
+@property(readonly) BOOL supportsHighAltitude;
+
+@end
+```
+
+This method accidentally inherited the `@MainActor` property from the enclosing type,
+even though it specifically documented different a threading strategy - it may or may not
+be invoked on the main actor. This is an annotation problem in the fictional JetPackKit library.
+
+Swift code adopting this library may look like this:
+
+```swift
+@MainActor
+final class MyJetPack: NSJetPack {
+  // May will crash with runtime MainActor isolation check
+  override class var supportsHighAltitude: Bool {
+    true
+  }
+}
+```
+
+The above may crash with a runtime check, which aims to ensure we are actually executing on the main actor as we're crossing
+from objective-c's non-swift-concurrency land into Swift. Such crash prevents wronly assuming that the thread inside this method
+is the main one, but in practice it was not, which could have led to data-races, even though the Swift code "looks correct".
+
+Such failure would include a similar backtrace to this:
+
+```
+* thread #5, queue = 'com.apple.root.default-qos', stop reason = EXC_BREAKPOINT (code=1, subcode=0x1004f8a5c)
+  * frame #0: 0x00000001004..... libdispatch.dylib`_dispatch_assert_queue_fail + 120
+    frame #1: 0x00000001004..... libdispatch.dylib`dispatch_assert_queue + 196
+    frame #2: 0x0000000275b..... libswift_Concurrency.dylib`swift_task_isCurrentExecutorImpl(swift::SerialExecutorRef) + 280
+    frame #3: 0x0000000275b..... libswift_Concurrency.dylib`Swift._checkExpectedExecutor(_filenameStart: Builtin.RawPointer, _filenameLength: Builtin.Word, _filenameIsASCII: Builtin.Int1, _line: Builtin.Word, _executor: Builtin.Executor) -> () + 60
+    frame #4: 0x00000001089..... MyApp.debug.dylib`@objc static JetPack.supportsHighAltitude.getter at <compiler-generated>:0
+    ...
+    frame #10: 0x00000001005..... libdispatch.dylib`_dispatch_root_queue_drain + 404
+    frame #11: 0x00000001005..... libdispatch.dylib`_dispatch_worker_thread2 + 188
+    frame #12: 0x00000001005..... libsystem_pthread.dylib`_pthread_wqthread + 228
+```
+
+As you can see, the runtime injected an executor check into the call, and the dispatch queue assertion (of it running on the MainActor), 
+has failed. This prevents sneaky and hard to debug data-races.
+
+While the real solution to this issue is the library fixing the method's annotation, bu marking it as nonisolated:
+
+```swift
+// Solution in the library providing the API:
+@property(readonly) BOOL supportsHighAltitude NS_SWIFT_NONISOLATED;
+````
+
+Until the library fixes its annotation issue, you are able to witness the method using a correctly non-isolated method, like this:
+
+```swift
+// Solution in adopting client code, wishing to run in Swift 6 mode:
+@MainActor
+final class MyJetPack: NSJetPack {
+  // Correct
+  override nonisolated class var readyForTakeoff: Bool {
+    true
+  }
+}
+```
+This way Swift knows not to check for the not correct assumption that the method requires main actor isolation.
