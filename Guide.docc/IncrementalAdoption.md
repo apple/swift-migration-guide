@@ -228,7 +228,7 @@ NS_SWIFT_ASYNC_NOTHROW
 NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
 
-### Dealing with wrongly annotated callbacks from Objective-C
+### Dealing mistakes in isolation annotations in Objective-C libraries
 
 While the SDKs and other objective-c libraries make progress in adopting Swift concurrency,
 they will often go through the exercise of codifying contracts which were only explained in
@@ -294,6 +294,10 @@ Such failure would include a similar backtrace to this:
     frame #11: 0x00000001005..... libdispatch.dylib`_dispatch_worker_thread2 + 188
     frame #12: 0x00000001005..... libsystem_pthread.dylib`_pthread_wqthread + 228
 ```
+
+> Note: When encountering such issue, and by investigating the documentation and API annotations you determine something
+>  was incorrectly annotated, the best way to resolve the root cause of the problem is to report the issue back to the 
+>  library maintainer. For Apple SDKs this can be done through [Feedback Assistant](https://feedbackassistant.apple.com).
 
 As you can see, the runtime injected an executor check into the call, and the dispatch queue assertion (of it running on the MainActor), 
 has failed. This prevents sneaky and hard to debug data-races.
