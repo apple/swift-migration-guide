@@ -264,7 +264,7 @@ Creating a task (in `addTask`) needs to allocate some memory for the task in ord
 while this amount of memory isn't too large, it can become significant if creating thousands of tasks which don't get to
 execute immediately but are just waiting until the executor gets to run them.
 
-When faced with such situation, it may be beneficial to manually throttle the number of concurrently added tasks to the task group, as follows:
+When faced with such a situation, it may be beneficial to manually throttle the number of concurrently added tasks to the task group, as follows:
 
 ```swift
 let lotsOfWork: [Work] = ... 
