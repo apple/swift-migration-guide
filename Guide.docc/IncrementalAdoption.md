@@ -294,5 +294,3 @@ await withTaskGroup(of: Something.self) { group in
     }
 }
 ```
-
-Currently, there is no built-in operation that'd handle this for you, but it is something worth exploring in the future.
