@@ -229,7 +229,7 @@ NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
 ## Dispatch
 
-Some patterns which you may be used to from Dispatch or other concurrency libraries,
+Some patterns which you may be used to from Dispatch or other concurrency libraries
 may need to be re-shaped in order to fit the world of Swift's structured concurrency model. 
 
 ### Limiting concurrency using Task Groups
