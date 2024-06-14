@@ -11,7 +11,7 @@ translate directly into this new model. In this section, we'll explore common
 patterns and differences in runtime behavior to be aware of, and how to address 
 them while you migrate your code to Swift concurrency.
 
-### Ordered stream processing
+## Ordered Processing
 
 ### Ordered work processing in actors, when enqueueing from a synchronous contexts
 
