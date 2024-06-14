@@ -13,7 +13,7 @@ them while you migrate your code to Swift concurrency.
 
 ## Ordered Processing
 
-### Ordered work processing in actors, when enqueueing from a synchronous contexts
+### From Synchronous Contexts
 
 Swift concurrency naturally enforces program order for asynchronous code as long
 as the execution remains in a single Task - this is equivalent to using "a single
