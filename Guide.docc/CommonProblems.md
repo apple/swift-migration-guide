@@ -27,6 +27,11 @@ Before data-race safety, global variable patterns relied on programmers
 carefully accessing global state in ways that avoided data-races
 without any help from the compiler.
 
+> Experiment: These code examples are available in package form.
+Try them out yourself in [Globals.swift][Globals].
+
+[Globals]: https://github.com/apple/swift-migration-guide/blob/main/Sources/Examples/Globals.swift
+
 ### Sendable Types
 
 ```swift
@@ -157,6 +162,11 @@ There are many possible solutions to this class of problem, but they often
 involve trade-offs.
 Choosing an appropriate approach first requires understanding _why_ there is a
 mismatch in the first place.
+
+> Experiment: These code examples are available in package form.
+Try them out yourself in [ConformanceMismatches.swift][ConformanceMismatches].
+
+[ConformanceMismatches]: https://github.com/apple/swift-migration-guide/blob/main/Sources/Examples/ConformanceMismatches.swift
 
 ### Under-Specified Protocol
 
@@ -394,6 +404,11 @@ that require them is a very common problem.
 And because libraries and frameworks may be updated to use Swift's
 concurrency features, these issues can come up even when your code hasn't
 changed.
+
+> Experiment: These code examples are available in package form.
+Try them out yourself in [Boundaries.swift][Boundaries].
+
+[Boundaries]: https://github.com/apple/swift-migration-guide/blob/main/Sources/Examples/Boundaries.swift
 
 ### Implicitly-Sendable Types
 
