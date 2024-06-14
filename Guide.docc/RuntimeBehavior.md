@@ -20,7 +20,7 @@ as the execution remains in a single Task - this is equivalent to using "a singl
 thread" to execute some work, but is more resource efficient because the task may
 suspend while waiting for some work, for example:
 
-```
+```swift
 // ✅ Guaranteed order, since caller is a single task
 let printer: Printer = ...
 await printer.print(1)
@@ -29,7 +29,7 @@ await printer.print(3)
 ```
 
 This code is structurally guaranteed to execute the prints in the expected "1, 2, 3"
-order, because the caller is a single task. Things
+order, because the caller is a single task.
 
 Dispatch queues offered the common `queue.async { ... }` way to kick off some
 asynchronous work without waiting for its result. In dispatch, if one were to
@@ -190,7 +190,7 @@ getting processed.
 Notice that we kick off an unstructured task in the actor's initializer, to handle the
 consuming of the stream. This also may be sub-optimal, because as cancellation must
 now be handled manually. You may instead prefer to _not_ create the consumer task
-at all in this Printer type, but require that some existing task invokes `await consumeStream()`, like this:
+at all in this `Printer` type, but require that some existing task invokes `await consumeStream()`, like this:
 
 ```
 let printer: Printer = ...
