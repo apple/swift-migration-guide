@@ -238,7 +238,7 @@ compile and runtime enforced isolation checks that Swift will then perform when 
 For example, the fictional `NSJetPack` protocol generally invokes all of its delegate methods
 on the main thread, and is MainActor-isolated. The SDK author therefore annotates the type like this:
 
-```swift
+```objc
 NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
 @protocol NSJetPack // fictional protocol
   // ...
