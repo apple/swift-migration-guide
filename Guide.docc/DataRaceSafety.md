@@ -10,8 +10,8 @@ entirely up to the programmer. This is notoriously difficult
 not just to do correctly, but also to keep correct over time.
 Even determining the _need_ for synchronization may be challenging.
 Worst of all, unsafe code does not guarantee failure at runtime.
-This code can often frequently seem to work, possibly requiring highly unusual
-conditions to exhibit the incorrect and unpredictable behavior characteristic
+This code can often seem to work, possibly because highly unusual conditions
+are required to exhibit the incorrect and unpredictable behavior characteristic
 of a data race.
 
 More formally, a data race occurs when one thread accesses memory while the
@@ -63,8 +63,8 @@ Data isolation is the _mechanism_ used to protect shared mutable state.
 But, it is often useful to talk about an independent unit of isolation.
 This is known as an _isolation domain_.
 How much state a particular domain is responsible for
-protecting can vary widely. Isolation domains can contain a single variable.
-Or, they could protect entire subsystems, like an complete user interface.
+protecting can vary widely. An isolation domain might protect a single variable, 
+or an entire subsystem, like a complete user interface.
 
 The critical feature of an isolation domain is the safety it provides.
 Mutable state can only be accessed from one isolation domain at a time.
@@ -106,10 +106,9 @@ func sailTheSea() {
 }
 ```
 
-This top-level function which has no static isolation, making it non-isolated.
-It can safely call other non-isolated functions and access non-isolated
-variables.
-But, it cannot access anything from another isolation domain.
+This top-level function has no static isolation, making it non-isolated.
+It can safely call other non-isolated functions, and access non-isolated
+variables, but it cannot access anything from another isolation domain.
 
 ```swift
 class Chicken {
@@ -325,7 +324,7 @@ extension Pirate: Feedable {
 ```
 
 A protocol's requirements themselves can also be isolated.
-This can offer more fine-grained control around how isolation is inferred
+This allows more fine-grained control around how isolation is inferred
 for conforming types.
 
 ```swift
@@ -350,7 +349,7 @@ The Swift Programming Language.
 Isolation _inference_ allows a type to implicitly define the isolation of
 its properties and methods.
 But these are all examples of _declarations_.
-It is also possible to achieve a similar effect with function values, though
+It is also possible to achieve a similar effect with function values, through
 isolation _inheritance_.
 
 A closure can capture the isolation at its declaration site, instead of the
@@ -378,7 +377,7 @@ enclosing scope.
 It is important to note that this form of isolation inheritance must be done
 explicitly, using the `isolated(any)` annotation.
 Function types offer a number of mechanisms for controlling their
-isolation behavior, but by default, they behave identically to other types.
+isolation behavior, but by default they behave identically to other types.
 
 > Note: For more information, see the [Closures][] section of
 The Swift Programming Language.
