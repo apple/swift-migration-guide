@@ -240,7 +240,7 @@ on the main thread, and is MainActor-isolated. The SDK author therefore annotate
 
 ```objc
 NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
-@protocol NSJetPack // fictional protocol
+@protocol JPKJetPack
   // ...
 @end
 ```
@@ -248,7 +248,7 @@ NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
 As such, all member methods of this protocol inherit the `@MainActor` annotation, and for most methods this is correct.
 However, in this example, let us consider a method which was previously documented as follows:
 
-```swift
+```objc
 NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
 @protocol NSJetPack // fictional protocol
 /* Return YES if this jetpack supports flying at really high altitude!
@@ -269,7 +269,7 @@ Swift code adopting this library may look like this:
 ```swift
 @MainActor
 final class MyJetPack: NSJetPack {
-  // May will crash with runtime MainActor isolation check
+  // May crash with runtime MainActor isolation check
   override class var supportsHighAltitude: Bool {
     true
   }
@@ -304,7 +304,7 @@ has failed. This prevents sneaky and hard to debug data-races.
 
 While the real solution to this issue is the library fixing the method's annotation, bu marking it as nonisolated:
 
-```swift
+```objc
 // Solution in the library providing the API:
 @property(readonly) BOOL supportsHighAltitude NS_SWIFT_NONISOLATED;
 ````
