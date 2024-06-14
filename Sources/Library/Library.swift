@@ -38,3 +38,37 @@ public struct GlobalActorIsolatedColorComponents : Sendable {
 
     public init() {}
 }
+
+public protocol Styler {
+    func applyStyle()
+}
+
+@MainActor
+public protocol GloballyIsolatedStyler {
+    func applyStyle()
+}
+
+public protocol PerRequirementIsolatedStyler {
+    @MainActor
+    func applyStyle()
+}
+
+@preconcurrency @MainActor
+public protocol StagedGloballyIsolatedStyler {
+    func applyStyle()
+}
+
+public protocol AsyncStyler {
+    func applyStyle() async
+}
+
+open class UIStyler {
+}
+
+public protocol InheritingStyler: UIStyler {
+    func applyStyle()
+}
+
+public protocol StylerConfiguration {
+    var primaryColorComponents: ColorComponents { get }
+}

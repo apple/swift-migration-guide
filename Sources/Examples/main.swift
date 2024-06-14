@@ -6,3 +6,4 @@ let manualSerialQueue = DispatchQueue(label: "com.apple.SwiftMigrationGuide")
 // Note: top-level code provides an asynchronous MainActor-isolated context
 await exerciseGlobalExamples()
 await exerciseBoundaryCrossingExamples()
+await exerciseConformanceMismatchExamples()

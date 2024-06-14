@@ -227,7 +227,6 @@ NS_SWIFT_ASYNC_NAME
 NS_SWIFT_ASYNC_NOTHROW
 NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
-
 ### Dealing missing isolation annotations in Objective-C libraries
 
 While the SDKs and other Objective-C libraries make progress in adopting Swift concurrency,
@@ -338,3 +337,71 @@ final class MyJetPack: NSJetPack {
 ```
 
 This way Swift knows not to check for the not-correct assumption that the method requires main actor isolation.
+
+## Dispatch
+
+Some patterns which you may be used to from Dispatch or other concurrency libraries
+may need to be re-shaped in order to fit the world of Swift's structured concurrency model. 
+
+### Limiting concurrency using Task Groups
+
+Sometimes you may find yourself with a large list of work to be processed.
+
+While it is possible to just enqueue "all" those work items to a task group like this:
+
+```swift
+// WARNING: Potentially wasteful -- perhaps this creates thousands of tasks concurrently (?!)
+
+let lotsOfWork: [Work] = ...
+await withTaskGroup(of: Something.self) { group in
+  for work in lotsOfWork {
+    // WARNING: If this is thousands of items, we may end up creating a lot of tasks
+    //  which won't get to be executed until much later, as we have a global limit on
+    //  the amount of concurrently running tasks - depending on the core count of the system,
+    //  and the default global executor's configuration.
+    group.addTask {
+      await work.work()
+    }
+  }
+
+  for await result in group {
+    process(result) // process the result somehow, depends on your needs
+  }
+}
+```
+
+If you suspect you may be dealing with hundreds or thousands of items, it may be wasteful to enqueue them all immediately.
+Creating a task (in `addTask`) needs to allocate some memory for the task in order to suspend and execute,
+while this amount of memory isn't too large, it can become significant if creating thousands of tasks which don't get to
+execute immediately but are just waiting until the executor gets to run them.
+
+When faced with such a situation, it may be beneficial to manually throttle the number of concurrently added tasks to the task group, as follows:
+
+```swift
+let lotsOfWork: [Work] = ... 
+let maxConcurrentWorkTasks = min(lotsOfWork.count, 10)
+assert(maxConcurrentWorkTasks > 0)
+
+await withTaskGroup(of: Something.self) { group in
+    var submittedWork = 0
+    for _ in 0..<maxConcurrentWorkTasks {
+        group.addTask { // or 'addTaskUnlessCancelled'
+            await lotsOfWork[submittedWork].work() 
+        }
+        submittedWork += 1
+    }
+    
+    for await result in group {
+        process(result) // process the result somehow, depends on your needs
+    
+        // Every time we get a result back, check if there's more work we should submit and do so
+        if submittedWork < lotsOfWork.count, 
+           let remainingWorkItem = lotsOfWork[submittedWork] {
+            group.addTask { // or 'addTaskUnlessCancelled'
+                await remainingWorkItem.work() 
+            }  
+            submittedWork += 1
+        }
+    }
+}
+```
