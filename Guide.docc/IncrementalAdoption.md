@@ -149,6 +149,70 @@ class UIStyler {
 Combining static and dynamic isolation can be a powerful tool to keep the
 scope of changes gradual.
 
+## Missing Annotations
+
+Dynamic isolation gives you tools to express isolation at runtime.
+But, you may also find you need to describe other concurrency properties
+that are missing from unmigrated modules.
+
+### Unmarked Sendable Closures
+
+The sendability of a closure affects how the compiler infers isolation for its
+body.
+A callback closure that actually does cross isolation boundaries but is
+_missing_ a `Sendable` annotation violates a critical invariant of the
+concurrency system.
+
+```swift
+// definition within a pre-Swift 6 module
+extension JPKJetPack {
+    // Note the lack of a @Sendable annotation
+    static func jetPackConfiguration(_ callback: @escaping () -> Void) {
+        // Can potentially cross isolation domains
+    }
+}
+
+@MainActor
+class PersonalTransportation {
+    func configure() {
+        JPKJetPack.jetPackConfiguration {
+            // MainActor isolation will be inferred here
+            self.applyConfiguration()
+        }
+    }
+
+    func applyConfiguration() {
+    }
+}
+```
+
+If `jetPackConfiguration` can invoke its closure in another isolation domain,
+it must be marked `@Sendable`.
+When an un-migrated module hasn't yet done this, it will result in incorrect
+actor inference.
+This code will compile without issue but crash at runtime.
+
+To workaround this, you can manually annotate the closure with `@Sendable.`
+This will prevent the compiler from inferring `MainActor` isolation.
+Because the compiler now knows actor isolation could change,
+it will require at await at the callsite.
+
+```swift
+@MainActor
+class PersonalTransportation {
+    func configure() {
+        JPKJetPack.jetPackConfiguration { @Sendable in
+            // Sendable closures do not infer actor isolation,
+            // making this context non-isolated
+            await self.applyConfiguration()
+        }
+    }
+
+    func applyConfiguration() {
+    }
+}
+```
+
 ## Backwards Compatibility
 
 It's important to keep in mind that static isolation, being part of the type
