@@ -157,14 +157,24 @@ that are missing from unmigrated modules.
 
 ### Unmarked Sendable Closures
 
-A callback that is missing a `Sendable` annotation can be a problem when
-combined with actor-isolated types.
+The sendability of a closure affects how the compiler infers isolation for its
+body.
+A callback closure that actually does cross isolation boundaries but is
+_missing_ a `Sendable` annotation violates a critical invariant of the
+concurrency system.
 
 ```swift
+// definition within a pre-Swift 6 module
+extension JPKJetPack {
+    // Note the lack of a @Sendable annotation
+    static func jetPackConfiguration(_ callback: @escaping () -> Void) {
+        // Can potentially cross isolation domains
+    }
+}
+
 @MainActor
 class PersonalTransportation {
     func configure() {
-        // This function is missing a Sendable annotation
         JPKJetPack.jetPackConfiguration {
             // MainActor isolation will be inferred here
             self.applyConfiguration()
@@ -180,20 +190,20 @@ If `jetPackConfiguration` can invoke its closure in another isolation domain,
 it must be marked `@Sendable`.
 When an un-migrated module hasn't yet done this, it will result in incorrect
 actor inference.
-The above code, which does contain dynamic isolation verification checks,
-will compile without issue but crash at runtime.
+This code will compile without issue but crash at runtime.
 
 To workaround this, you can manually annotate the closure with `@Sendable.`
 This will prevent the compiler from inferring `MainActor` isolation.
 Because the compiler now knows actor isolation could change,
-it will require at await at the callsite to ensure correct isolation.
+it will require at await at the callsite.
 
 ```swift
 @MainActor
 class PersonalTransportation {
     func configure() {
         JPKJetPack.jetPackConfiguration { @Sendable in
-            // Sendable closures do not infer actor isolation
+            // Sendable closures do not infer actor isolation,
+            // making this context non-isolated
             await self.applyConfiguration()
         }
     }
