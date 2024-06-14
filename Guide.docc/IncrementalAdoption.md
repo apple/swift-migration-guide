@@ -228,24 +228,32 @@ NS_SWIFT_ASYNC_NOTHROW
 NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
 
-### Dealing mistakes in isolation annotations in Objective-C libraries
+### Dealing missing isolation annotations in Objective-C libraries
 
-While the SDKs and other objective-c libraries make progress in adopting Swift concurrency,
+While the SDKs and other Objective-C libraries make progress in adopting Swift concurrency,
 they will often go through the exercise of codifying contracts which were only explained in
-documentation, like "this will always be called on the main thread", and turn them intro 
-compile and runtime enforced isolation checks that Swift will then perform when you adopt such APIs.
+documentation. For example, before Swift concurrency, APIs frequently had to document their
+threading behavior with comments like "this will always be called on the main thread".
+
+Swift concurrency enables us to turn these code comments, into compiler and runtime 
+enforced isolation checks, that Swift will then verify when you adopt such APIs.
 
 For example, the fictional `NSJetPack` protocol generally invokes all of its delegate methods
-on the main thread, and is MainActor-isolated. The SDK author therefore annotates the type like this:
+on the main thread, and therefore has now become MainActor-isolated. 
 
-```objc
-NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
-@protocol JPKJetPack
+The library author can mark as MainActor isolated using the `NS_SWIFT_UI_ACTOR` attribute,
+which is equivalent to annotating a type using `@MainActor` in Swift: 
+
+```swift
+NS_SWIFT_UI_ACTOR
+@protocol NSJetPack // fictional protocol
   // ...
 @end
 ```
 
-As such, all member methods of this protocol inherit the `@MainActor` annotation, and for most methods this is correct.
+Thanks to this, all member methods of this protocol inherit the `@MainActor` isolation, 
+and for most methods this is correct. 
+
 However, in this example, let us consider a method which was previously documented as follows:
 
 ```objc
@@ -260,25 +268,32 @@ NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
 @end
 ```
 
-This method accidentally inherited the `@MainActor` property from the enclosing type,
-even though it specifically documented different a threading strategy - it may or may not
-be invoked on the main actor. This is an annotation problem in the fictional JetPackKit library.
+This method's isolation was accidentally inferred as `@MainActor`, because of the annotation on the enclosing type.
+Although it has specifically documented different a threading strategy - it may or may not
+be invoked on the main actor - it missed to annotate these semantics on the method. 
+
+This is an annotation problem in the fictional JetPackKit library. 
+Specifically, it is missing a `nonisolated` annotation on the method,
+which would inform Swift about the correct and expected execution semantics.
 
 Swift code adopting this library may look like this:
 
 ```swift
 @MainActor
 final class MyJetPack: NSJetPack {
-  // May crash with runtime MainActor isolation check
-  override class var supportsHighAltitude: Bool {
+  override class var supportsHighAltitude: Bool { // runtime crash in Swift 6 mode
     true
   }
 }
 ```
 
-The above may crash with a runtime check, which aims to ensure we are actually executing on the main actor as we're crossing
-from objective-c's non-swift-concurrency land into Swift. Such crash prevents wronly assuming that the thread inside this method
-is the main one, but in practice it was not, which could have led to data-races, even though the Swift code "looks correct".
+The above code will crash with a runtime check, which aims to ensure we are actually 
+executing on the main actor as we're crossing from objective-c's non-swift-concurrency
+land into Swift.
+
+It is a Swift 6 feature to detect such issues automatically and crash at runtime 
+when such expectations are violated. Leaving such issues un-diagnosed, could lead
+to actual hard-to-detect data races, and undermine Swift 6's promise about data-race safety.
 
 Such failure would include a similar backtrace to this:
 
@@ -297,19 +312,19 @@ Such failure would include a similar backtrace to this:
 
 > Note: When encountering such issue, and by investigating the documentation and API annotations you determine something
 >  was incorrectly annotated, the best way to resolve the root cause of the problem is to report the issue back to the 
->  library maintainer. For Apple SDKs this can be done through [Feedback Assistant](https://feedbackassistant.apple.com).
+>  library maintainer.
 
 As you can see, the runtime injected an executor check into the call, and the dispatch queue assertion (of it running on the MainActor), 
 has failed. This prevents sneaky and hard to debug data-races.
 
-While the real solution to this issue is the library fixing the method's annotation, bu marking it as nonisolated:
+The correct long-term solution to this issue is the library fixing the method's annotation, by marking it as `nonisolated`:
 
 ```objc
 // Solution in the library providing the API:
 @property(readonly) BOOL supportsHighAltitude NS_SWIFT_NONISOLATED;
 ````
 
-Until the library fixes its annotation issue, you are able to witness the method using a correctly non-isolated method, like this:
+Until the library fixes its annotation issue, you are able to witness the method using a correctly `nonisolated` method, like this:
 
 ```swift
 // Solution in adopting client code, wishing to run in Swift 6 mode:
@@ -321,4 +336,5 @@ final class MyJetPack: NSJetPack {
   }
 }
 ```
-This way Swift knows not to check for the not correct assumption that the method requires main actor isolation.
+
+This way Swift knows not to check for the not-correct assumption that the method requires main actor isolation.
