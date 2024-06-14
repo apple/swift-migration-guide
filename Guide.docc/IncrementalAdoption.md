@@ -166,7 +166,7 @@ class PersonalTransportation {
     func configure() {
         // This function is missing a Sendable annotation
         JPKJetPack.jetPackConfiguration {
-            // MainActor isolation will be inferred here, incorrectly
+            // MainActor isolation will be inferred here
             self.applyConfiguration()
         }
     }
