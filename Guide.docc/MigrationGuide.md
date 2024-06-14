@@ -60,3 +60,4 @@ full code examples, and learn about how to contribute in the [repository][].
 - <doc:IncrementalAdoption>
 - <doc:CommonProblems>
 - <doc:RuntimeBehavior>
+- <doc:Guidance>
