@@ -175,10 +175,11 @@ Remember that static isolation allows the compiler to both verify and automate
 the process of switching isolation as needed.
 Even when used in combination with static isolation, it can be difficult
 to determine when `MainActor.run` is truly necessary.
-
-> Note: While `MainActor.run` can be useful during migration,
+While `MainActor.run` can be useful during migration,
 it should not be used as a substitute for expressing the isolation
 requirements of your system statically.
+The ultimate goal should still be to apply `@MainActor`
+to `PersonalTransportation`.
 
 ## Missing Annotations
 
