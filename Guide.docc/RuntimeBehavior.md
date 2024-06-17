@@ -34,12 +34,11 @@ await withTaskGroup(of: Something.self) { group in
 }
 ```
 
-If you suspect you may be dealing with hundreds or thousands of items, it may be wasteful to enqueue them all immediately.
-Creating a task (in `addTask`) needs to allocate some memory for the task in order to suspend and execute.
-This amount of memory isn't too large, it can become significant if creating thousands of tasks which don't get to
-execute immediately but are just waiting until the executor gets to run them.
+If you expect to deal with hundreds or thousands of items, it might be inefficient to enqueue them all immediately.
+Creating a task (in `addTask`) allocates memory for the task in order to suspend and execute it.
+While the amount of memory for each task isn't large, it can be significant when creating thousands of tasks that won't execute immediately.
 
-When faced with such a situation, it may be beneficial to manually throttle the number of concurrently added tasks to the task group, as follows:
+When faced with such a situation, you can manually throttle the number of concurrently added tasks in the group, as follows:
 
 ```swift
 let lotsOfWork: [Work] = ... 

@@ -1,6 +1,6 @@
 # The Swift Concurrency Migration Guide
 
-This repository contains the source for *The Swift Concurrency Migration Guide*,
+This repository contains the source for [The Swift Concurrency Migration Guide][scmg],
 which is built using [Swift-DocC][docc].
 
 ## Contributing
@@ -29,3 +29,4 @@ open the link that `docc` outputs to display a local preview in your browser.
 [contributing]: https://github.com/apple/swift-migration-guide/blob/main/CONTRIBUTING.md
 [docc]: https://github.com/apple/swift-docc
 [conduct]: https://www.swift.org/code-of-conduct
+[scmg]: https://www.swift.org/migration/documentation/migrationguide
