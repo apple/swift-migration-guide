@@ -156,6 +156,38 @@ class UIStyler {
 Combining static and dynamic isolation can be a powerful tool to keep the
 scope of changes gradual.
 
+### Explicit MainActor Context
+
+The `assumeIsolated` method is synchronous and exists to recover isolation
+information from runtime back into the type-system by preventing execution
+if the assumption was incorrect.
+that would otherwise be invisible to the compiler.
+The `MainActor` type also has a method you can use to manually switch
+isolation in an asynchronous context.
+
+```swift
+// type that should be MainActor, but has not been updated yet
+class PersonalTransportation {
+}
+
+await MainActor.run {
+    // isolated to the MainActor here
+    let transport = PersonalTransportation()
+    
+    // ...
+}
+```
+
+Remember that static isolation allows the compiler to both verify and automate
+the process of switching isolation as needed.
+Even when used in combination with static isolation, it can be difficult
+to determine when `MainActor.run` is truly necessary.
+While `MainActor.run` can be useful during migration,
+it should not be used as a substitute for expressing the isolation
+requirements of your system statically.
+The ultimate goal should still be to apply `@MainActor`
+to `PersonalTransportation`.
+
 ## Missing Annotations
 
 Dynamic isolation gives you tools to express isolation at runtime.
