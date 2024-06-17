@@ -46,8 +46,10 @@ func updateStyle(backgroundColor: ColorComponents) async {
 }
 ```
 
-> Note: You have to take care to _resume_ the continuation _exactly once_. 
-> Resuming a checked continuation more than once will cause an expected crash, guarding you from undefined behavior.
+> Note: You have to take care to _resume_ the continuation _exactly once_.
+> If you miss invoking it, the calling task will remain suspended indefinitely.
+> On the other hand, resuming a checked continuation more than once will cause an expected crash,
+> protecting you from undefined behavior.
 
 With an asynchronous version, there is no longer any ambiguity.
 After the function has completed, execution will always resume in the same
