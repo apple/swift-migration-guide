@@ -291,7 +291,7 @@ NS_SWIFT_ASYNC_NAME
 NS_SWIFT_ASYNC_NOTHROW
 NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
-### Dealing missing isolation annotations in Objective-C libraries
+### Dealing with missing isolation annotations in Objective-C libraries
 
 While the SDKs and other Objective-C libraries make progress in adopting Swift concurrency,
 they will often go through the exercise of codifying contracts which were only explained in
@@ -332,8 +332,8 @@ NS_SWIFT_UI_ACTOR // SDK author annotated using MainActor in recent SDK audit
 ```
 
 This method's isolation was accidentally inferred as `@MainActor`, because of the annotation on the enclosing type.
-Although it has specifically documented different a threading strategy - it may or may not
-be invoked on the main actor - it missed to annotate these semantics on the method. 
+Although it has specifically documented a different threading strategy - it may or may not
+be invoked on the main actor - annotating these semantics on the method was accidentally missed. 
 
 This is an annotation problem in the fictional JetPackKit library. 
 Specifically, it is missing a `nonisolated` annotation on the method,
@@ -373,7 +373,7 @@ Such failure would include a similar backtrace to this:
     frame #12: 0x00000001005..... libsystem_pthread.dylib`_pthread_wqthread + 228
 ```
 
-> Note: When encountering such issue, and by investigating the documentation and API annotations you determine something
+> Note: When encountering such an issue, and by investigating the documentation and API annotations you determine something
 >  was incorrectly annotated, the best way to resolve the root cause of the problem is to report the issue back to the 
 >  library maintainer.
 
