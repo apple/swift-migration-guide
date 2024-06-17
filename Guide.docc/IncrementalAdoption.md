@@ -66,7 +66,7 @@ checking violations. To understand and address these, see [Crossing Isolation Bo
 
 Expressing the isolation of your program statically, using annotations and
 other language constructs, is both powerful and concise.
-But, it can be difficult to introduce static isolation without updating
+But it can be difficult to introduce static isolation without updating
 all dependencies simultaneously.
 
 Dynamic isolation provides runtime mechanisms you can use as a fallback for
@@ -92,7 +92,7 @@ class WindowStyler {
 ```
 
 This `MainActor` isolation may be _logically_ correct.
-But, if this type is used in other unmigrated locations,
+But if this type is used in other unmigrated locations,
 adding static isolation here could require many additional changes.
 An alternative is to use dynamic isolation to help control the scope.
 
@@ -152,7 +152,7 @@ scope of changes gradual.
 ## Missing Annotations
 
 Dynamic isolation gives you tools to express isolation at runtime.
-But, you may also find you need to describe other concurrency properties
+But you may also find you need to describe other concurrency properties
 that are missing from unmigrated modules.
 
 ### Unmarked Sendable Closures
@@ -217,7 +217,7 @@ class PersonalTransportation {
 
 It's important to keep in mind that static isolation, being part of the type
 system, affects your public API.
-But, you can migrate your own modules in a way that improves their APIs for
+But you can migrate your own modules in a way that improves their APIs for
 Swift 6 *without* breaking any existing clients.
 
 Suppose the `WindowStyler` is public API.
