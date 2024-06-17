@@ -46,7 +46,7 @@ func updateStyle(backgroundColor: ColorComponents) async {
 }
 ```
 
-> Note: You have to take care to _resume_ the continuation _exactly-once_. 
+> Note: You have to take care to _resume_ the continuation _exactly once_. 
 > Resuming a checked continuation will cause an expected crash, guarding you from undefined behavior.
 
 With an asynchronous version, there is no longer any ambiguity.
