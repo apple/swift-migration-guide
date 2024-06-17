@@ -476,3 +476,17 @@ await withTaskGroup(of: Something.self) { group in
     }
 }
 ```
+
+If you have a task which may be long-running, it may make sense to voluntarily suspend the task and allow other tasks to execute:
+
+```swift
+struct Work {
+    func work() async {
+        // long running computation
+        await Task.yield()
+        // continue long running computation
+    }
+}
+```
+If this task is the highest-priority task in the system, the executor immediately resumes execution of the same task.
+Therefore this method isn’t necessarily a way to avoid resource starvation.
