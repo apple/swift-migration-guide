@@ -63,7 +63,8 @@ Data isolation is the _mechanism_ used to protect shared mutable state.
 But it is often useful to talk about an independent unit of isolation.
 This is known as an _isolation domain_.
 How much state a particular domain is responsible for
-protecting varies widely. An isolation domain might protect a single variable, or an entire subsystem, such as a user interface.
+protecting varies widely. An isolation domain might protect a single variable,
+or an entire subsystem, such as a user interface.
 
 The critical feature of an isolation domain is the safety it provides.
 Mutable state can only be accessed from one isolation domain at a time.
