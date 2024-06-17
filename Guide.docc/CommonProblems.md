@@ -145,7 +145,7 @@ Here, we see two functions that could access the internal state of the
 The compiler only permits these kinds of cross-isolation accesses with
 `Sendable` types.
 One option is to isolate the variable to a single domain using a global actor.
-But it could also make sense to instead add a conformance to `Sendable`
+Alternatively, it might make sense to add a conformance to `Sendable`
 directly.
 
 ## Protocol Conformance Isolation Mismatch
@@ -432,9 +432,9 @@ func updateStyle(backgroundColor: ColorComponents) async {
 }
 ```
 
-`Sendable` conformance is part of a type's public API contract,
+A `Sendable` conformance is part of a type's public API contract,
 which is up to you to declare.
-Because `ColorComponents` is marked `public` it will not implicitly
+Because `ColorComponents` is marked `public`, it will not implicitly
 conform to `Sendable`.
 This will result in the following error:
 
@@ -508,7 +508,7 @@ func updateStyle(backgroundColor: ColorComponents) async {
 
 The `updateStyle(backgroundColor:)` function is non-isolated.
 This means that its non-`Sendable` parameter is also non-isolated.
-But it crosses immediately from this non-isolated domain to the
+The implementation crosses immediately from this non-isolated domain to the
 `MainActor` when `applyBackground(_:)` is called.
 
 Since `updateStyle(backgroundColor:)` is working directly with
@@ -584,7 +584,7 @@ actor Style {
 }
 ```
 
-In addition to gaining `Sendable` conformance, actors receive their own
+In addition to gaining a `Sendable` conformance, actors receive their own
 isolation domain.
 This allows them to work freely with other non-`Sendable` types internally.
 This can be a major advantage, but does come with trade-offs.
@@ -622,7 +622,7 @@ manual synchronization only when truly necessary.
 It is possible for reference types to be validated as `Sendable` without
 the `unchecked` qualifier, but this is only done under very narrow circumstances.
 
-To allow checked `Sendable` conformance, a class:
+To allow a checked `Sendable` conformance, a class:
 
 - Must be `final`
 - Cannot inherit from another class other than `NSObject`

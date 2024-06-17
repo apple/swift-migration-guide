@@ -245,7 +245,7 @@ automatically based on context.
 Task isolation, just like all other Swift code, determines what mutable state
 they can access.
 
-Tasks can run both synchronous and asynchronous code. But regardless of the
+Tasks can run both synchronous and asynchronous code. Regardless of the
 structure and how many tasks are involved, functions in the same isolation
 domain cannot run concurrently with each other.
 There will only ever be one task running synchronous code for any given
