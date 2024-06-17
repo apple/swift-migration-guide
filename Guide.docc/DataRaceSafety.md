@@ -60,11 +60,11 @@ see <doc:IncrementalAdoption#Dynamic-Isolation>
 ### Isolation Domains
 
 Data isolation is the _mechanism_ used to protect shared mutable state.
-But, it is often useful to talk about an independent unit of isolation.
+But it is often useful to talk about an independent unit of isolation.
 This is known as an _isolation domain_.
 How much state a particular domain is responsible for
-protecting can vary widely. An isolation domain might protect a single variable, 
-or an entire subsystem, like a complete user interface.
+protecting varies widely. An isolation domain might protect a single variable,
+or an entire subsystem, such as a user interface.
 
 The critical feature of an isolation domain is the safety it provides.
 Mutable state can only be accessed from one isolation domain at a time.
@@ -119,11 +119,11 @@ class Chicken {
 
 This is an example of a non-isolated type.
 Inheritance can play a role in static isolation.
-But, this simple class, with no superclass or protocol conformances,
+But this simple class, with no superclass or protocol conformances,
 also uses the default isolation.
 
 Data isolation guarantees that non-isolated entities cannot access the mutable
-state from other domains.
+state of other domains.
 As a result of this, non-isolated functions and variables are always safe to
 access from any other domain.
 
@@ -246,7 +246,7 @@ automatically based on context.
 Task isolation, just like all other Swift code, determines what mutable state
 they can access.
 
-Tasks can run both synchronous and asynchronous code. But, regardless of the
+Tasks can run both synchronous and asynchronous code. Regardless of the
 structure and how many tasks are involved, functions in the same isolation
 domain cannot run concurrently with each other.
 There will only ever be one task running synchronous code for any given
@@ -260,7 +260,7 @@ The Swift Programming Language.
 ### Isolation Inference and Inheritance
 
 There are many ways to specify isolation explicitly.
-But, there are cases where the context of a declaration will establish isolation
+But there are cases where the context of a declaration establishes isolation
 implicitly, via _isolation inference_.
 
 #### Classes
@@ -386,7 +386,7 @@ The Swift Programming Language.
 
 ## Isolation Boundaries
 
-Isolation domains protect their mutable state. But, useful programs need more
+Isolation domains protect their mutable state, but useful programs need more
 than just protection. They have to communicate and coordinate,
 often by passing data back and forth.
 Moving values into or out of an isolation domain is known as crossing an
@@ -450,7 +450,7 @@ The Swift Programming Language.
 
 ### Actor-Isolated Types
 
-Actors are not value types. But, because they protect all of their state
+Actors are not value types, but because they protect all of their state
 in their own isolation domain,
 they are inherently safe to pass across boundaries.
 This makes all actor types implicitly `Sendable`, even if their properties
@@ -529,10 +529,9 @@ func stockUp() {
 ```
 
 Potential suspension points are marked in source code with the `await` keyword.
-Its presence indicates that the call might suspend at runtime.
-But, `await` does not force a suspension, and the function being called might
-only suspend under certain dynamic conditions.
-It's possible that a call marked with `await` doesn't actually suspend.
+Its presence indicates that the call might suspend at runtime, but `await` does not force a suspension. The function being called might
+suspend only under certain dynamic conditions.
+It's possible that a call marked with `await` will not actually suspend.
 
 ### Atomicity
 

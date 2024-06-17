@@ -73,7 +73,7 @@ checking violations. To understand and address these, see [Crossing Isolation Bo
 
 Expressing the isolation of your program statically, using annotations and
 other language constructs, is both powerful and concise.
-But, it can be difficult to introduce static isolation without updating
+But it can be difficult to introduce static isolation without updating
 all dependencies simultaneously.
 
 Dynamic isolation provides runtime mechanisms you can use as a fallback for
@@ -99,7 +99,7 @@ class WindowStyler {
 ```
 
 This `MainActor` isolation may be _logically_ correct.
-But, if this type is used in other unmigrated locations,
+But if this type is used in other unmigrated locations,
 adding static isolation here could require many additional changes.
 An alternative is to use dynamic isolation to help control the scope.
 
@@ -156,10 +156,42 @@ class UIStyler {
 Combining static and dynamic isolation can be a powerful tool to keep the
 scope of changes gradual.
 
+### Explicit MainActor Context
+
+The `assumeIsolated` method is synchronous and exists to recover isolation
+information from runtime back into the type-system by preventing execution
+if the assumption was incorrect.
+that would otherwise be invisible to the compiler.
+The `MainActor` type also has a method you can use to manually switch
+isolation in an asynchronous context.
+
+```swift
+// type that should be MainActor, but has not been updated yet
+class PersonalTransportation {
+}
+
+await MainActor.run {
+    // isolated to the MainActor here
+    let transport = PersonalTransportation()
+    
+    // ...
+}
+```
+
+Remember that static isolation allows the compiler to both verify and automate
+the process of switching isolation as needed.
+Even when used in combination with static isolation, it can be difficult
+to determine when `MainActor.run` is truly necessary.
+While `MainActor.run` can be useful during migration,
+it should not be used as a substitute for expressing the isolation
+requirements of your system statically.
+The ultimate goal should still be to apply `@MainActor`
+to `PersonalTransportation`.
+
 ## Missing Annotations
 
 Dynamic isolation gives you tools to express isolation at runtime.
-But, you may also find you need to describe other concurrency properties
+But you may also find you need to describe other concurrency properties
 that are missing from unmigrated modules.
 
 ### Unmarked Sendable Closures
@@ -224,7 +256,7 @@ class PersonalTransportation {
 
 It's important to keep in mind that static isolation, being part of the type
 system, affects your public API.
-But, you can migrate your own modules in a way that improves their APIs for
+But you can migrate your own modules in a way that improves their APIs for
 Swift 6 *without* breaking any existing clients.
 
 Suppose the `WindowStyler` is public API.
