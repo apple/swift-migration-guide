@@ -123,7 +123,7 @@ But, this simple class, with no superclass or protocol conformances,
 also uses the default isolation.
 
 Data isolation guarantees that non-isolated entities cannot access the mutable
-state from other domains.
+state of other domains.
 As a result of this, non-isolated functions and variables are always safe to
 access from any other domain.
 
