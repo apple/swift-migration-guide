@@ -38,14 +38,16 @@ _continuations_.
 func updateStyle(backgroundColor: ColorComponents) async {
     withCheckedContinuation { continuation in
         updateStyle(backgroundColor: backgroundColor) {
-            // do the completion work...
+            // ... do some work here ...
 
-            // call this method exactly once
             continuation.resume()
         }
     }
 }
 ```
+
+> Note: You have to take care to _resume_ the continuation _exactly-once_. 
+> Resuming a checked continuation will cause an expected crash, guarding you from undefined behavior.
 
 With an asynchronous version, there is no longer any ambiguity.
 After the function has completed, execution will always resume in the same
