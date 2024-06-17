@@ -52,7 +52,9 @@ let package = Package(
                 .swiftLanguageVersion(.v5)
             ]
         )
-    ]
+    ],
+    // Set default tools langugae version
+    swiftLanguageVersions: [.v6]
 )
 ```
 
