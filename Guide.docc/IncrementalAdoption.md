@@ -38,6 +38,9 @@ _continuations_.
 func updateStyle(backgroundColor: ColorComponents) async {
     withCheckedContinuation { continuation in
         updateStyle(backgroundColor: backgroundColor) {
+            // do the completion work...
+
+            // call this method exactly once
             continuation.resume()
         }
     }
