@@ -7,8 +7,8 @@ The data isolation guarantees made by the compiler affect all Swift code.
 This means complete concurrency checking can surface latent issues,
 even in Swift 5 code that doesn't use any concurrency language features
 directly.
-And, with the Swift 6 language mode is on, some of these potential issues
-can become errors.
+With the Swift 6 language mode enabled, some of these potential issues
+can also become errors.
 
 After enabling complete checking, many projects can contain a large
 number of warnings and errors.
@@ -268,7 +268,7 @@ protocol Styler {
 #### Asynchronous Requirements
 
 For methods that implement synchronous protocol requirements, either the
-isolation of method must match the isolation of the requirement exactly,
+isolation of the method must match the isolation of the requirement exactly,
 or the method must be `nonisolated`, meaning it can be called from
 any isolation domain without risk of data races. Making a requirement
 asynchronous offers a lot more flexibility over the isolation in
@@ -483,7 +483,7 @@ func updateStyle(backgroundColor: ColorComponents) async {
 With the addition of this `@preconcurrency import`,
 `ColorComponents` remains non-`Sendable`.
 However, the compiler's behavior will be altered.
-When using the Swift 6 language mode, the produced here will be downgraded
+When using the Swift 6 language mode, the error produced here will be downgraded
 to a warning.
 The Swift 5 language mode will produce no diagnostics at all.
 
