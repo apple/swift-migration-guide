@@ -63,3 +63,4 @@ full code examples, and learn about how to contribute in the [repository][].
 ### Swift Concurrency in Depth
 
 - <doc:RuntimeBehavior>
+- <doc:MigrationStrategy>
