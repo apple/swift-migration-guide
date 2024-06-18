@@ -1,7 +1,6 @@
 # Migration Strategy
 
-Get recommendations on how to proceed with migrating your project to the
-Swift 6 language mode.
+Get started migrating your project to the Swift 6 language mode.
 
 Enabling complete concurrency checking in a module can yield many data-race
 safety issues reported by the compiler.
