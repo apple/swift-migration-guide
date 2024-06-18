@@ -17,10 +17,14 @@ changes.
 And as you do, your mental model of how the Swift concurrency system works
 will develop just as rapidly.
 
+> Important: This guidance should not be interpreted as a recommendation.
+You should feel confident about using other approaches.
+
 ## Strategy
 
-There is no one single approach that will work for all projects,
-but there is a general strategy that is often effective.
+This document outlines a general strategy that could be a good starting point.
+There is no one single approach that will work for all projects.
+
 The approach has three key steps:
 
 - Select a module
@@ -33,18 +37,19 @@ project as a whole.
 
 ## Begin from the Outside
 
-It is often easiest to start with the outer-most root module in a project.
-This, by definition, is not a depenency of any other module.
-Changes here can only have local effects, making it easier to
+It can be easier to start with the outer-most root module in a project.
+This, by definition, is not a dependency of any other module.
+Changes here can only have local effects, making it possible to
 keep work contained.
 
 ## Use the Swift 5 Language Mode
 
-Don't move directly from Swift 5 with no checking to the Swift 6 language mode.
-It is possible to incrementally enable more of the Swift 6 checking mechanisms
-while remaining in Swift 5 mode.
-This will surface issues only as warnings, keeping your build and
-tests functional as you progress.
+You could find it quite challenging to move a project from Swift 5 with no
+checking directly to the Swift 6 language mode.
+It is possible, instead, to incrementally enable more of the Swift 6 checking
+mechanisms while remaining in Swift 5 mode.
+This will surface issues only as warnings,
+keeping your build and tests functional as you progress.
 
 To start, enable a single upcoming concurrency feature.
 This allows you to focus on one _specific type_ of problem at a time.
