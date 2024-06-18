@@ -34,8 +34,8 @@ concepts and practical help to ease the migration.
 Here you will find articles and code examples that will:
 
 - Explain the concepts used by Swift's data-race safety model.
-- Demonstrate how to enable the Swift 6 language mode.
 - Show how to enable complete concurrency checking for Swift 5 projects.
+- Demonstrate how to enable the Swift 6 language mode.
 - Provide techniques for incremental adoption.
 - Present strategies to resolve common problems.
 
@@ -55,12 +55,12 @@ full code examples, and learn about how to contribute in the [repository][].
 ## Topics
 
 - <doc:DataRaceSafety>
-- <doc:Swift6Mode>
 - <doc:CompleteChecking>
+- <doc:Swift6Mode>
 - <doc:IncrementalAdoption>
 - <doc:CommonProblems>
+- <doc:MigrationStrategy>
 
 ### Swift Concurrency in Depth
 
 - <doc:RuntimeBehavior>
-- <doc:MigrationStrategy>
