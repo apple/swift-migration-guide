@@ -508,3 +508,21 @@ await withTaskGroup(of: Something.self) { group in
     }
 }
 ```
+
+If the "work" task involves long-running synchronous code it may make sense to voluntarily suspend the task and allow other tasks to execute:
+
+```swift
+struct Work {
+  let dependency: Dependency
+  func work() async {
+    await dependency.fetch()
+    // execute part of long running synchronous code
+    await Task.yield()  // explicitly insert a suspension point
+    // continue long running synchronous execution
+  }
+}
+```
+
+Introducing an explicit suspension point helps Swift balance between making progress on this task, and letting other tasks in your program make progress on their work.
+However, if this task has the highest-priority in the system, the executor immediately resumes execution of the same task.
+Therefore an explicit suspension point isn’t necessarily a way to avoid resource starvation.
