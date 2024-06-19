@@ -41,6 +41,15 @@ This, by definition, is not a dependency of any other module.
 Changes here can only have local effects, making it possible to
 keep work contained.
 
+Your changes do not _need_ to be contained to the module, however.
+Dependencies under your control that have [unsafe global state][Global] or
+[trivially-`Sendable` types][Sendable] can be the root cause of many warnings
+across your project.
+These can often be the best things to focus on first.
+
+[Global]: <doc:CommonProblems#Unsafe-Global-and-Static-Variables>
+[Sendable]: <doc:CommonProblems#Implicitly-Sendable-Types>
+
 ## Use the Swift 5 Language Mode
 
 You could find it quite challenging to move a project from Swift 5 with no
