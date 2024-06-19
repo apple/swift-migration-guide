@@ -537,6 +537,9 @@ It's possible that a call marked with `await` will not actually suspend.
 
 While actors do guarantee safety from data races, they do not ensure
 atomicity across suspension points.
+Concurrent code often needs to execute a sequence of operations together as an
+atomic unit, such that other threads can never see an intermediate state.
+Units of code that require this property are known as _critical sections_.
 Because the current isolation domain is freed up to perform other work,
 actor-isolated state may change after an asynchronous call.
 As a consequence, you can think of explicitly marking potential suspension
