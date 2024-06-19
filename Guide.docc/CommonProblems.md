@@ -92,6 +92,16 @@ disallow mutation, guaranteeing safe read-only access.
 let supportedStyleCount = 42
 ```
 
+A constant value can also be expressed with a computed property.
+This is semantically equivalent to a `let` constant, but could have
+different impacts on a final linked artifact.
+
+```swift
+var supportedStyleCount: Int {
+    42
+}
+```
+
 If there is synchronization in place that protects this variable in a way that
 is invisible to the compiler, you can disable all isolation checking for
 `supportedStyleCount` using the `nonisolated(unsafe)` keyword:
