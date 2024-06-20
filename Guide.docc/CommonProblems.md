@@ -385,7 +385,12 @@ However, this solution will require some structural changes to `WindowStyler`
 that could spill out to dependent code as well.
 
 ```swift
-struct CustomWindowStyle: Styler {
+// class with necessary superclass
+class CustomWindowStyle: UIStyler {
+}
+
+// now, the conformance is possible
+extension CustomWindowStyle: Styler {
     func applyStyle() {
     }
 }
