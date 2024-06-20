@@ -656,6 +656,31 @@ it `Sendable` should not be your first approach.
 It is often easier to try other techniques first, falling back to
 manual synchronization only when truly necessary.
 
+#### Retroative Sendable Conformance
+
+Your dependencies may also expose types that are using manual synchronization.
+This is usually visible only via documentation.
+It is possible to add an `@unchecked Sendable` conformance in this case as well.
+
+```swift
+extension ColorComponents: @retroactive @unchecked Sendable {
+}
+```
+
+Because `Sendable` is a marker protocol, a retroactive conformance
+does not have direct binary compatibility issues.
+However, it should still be used with extreme caution.
+Types that use manual synchronization can come with conditions or
+exceptions to their safety that may not completely match the sematics of
+`Sendable`.
+Further, you should be _particularly_ careful about using this technique
+for types that are part of your system's public API.
+
+> Note: To learn more about retroactive conformances,
+see the associated [Swift evolution proposal][SE-0364].
+
+[SE-0364]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0364-retroactive-conformance-warning.md
+
 #### Sendable Reference Types
 
 It is possible for reference types to be validated as `Sendable` without

@@ -8,13 +8,20 @@ func applyBackground(_ color: ColorComponents) {
 }
 
 #if swift(<6.0)
-/// A non-isolated function  that accepts non-`Sendable` parameters.
+/// A non-isolated function that accepts non-`Sendable` parameters.
 func updateStyle(backgroundColor: ColorComponents) async {
     // the `backgroundColor` parameter is being moved from the
     // non-isolated domain to the `MainActor` here.
     //
     // Swift 5 Warning: passing argument of non-sendable type 'ColorComponents' into main actor-isolated context may introduce data races
     // Swift 6 Error: sending 'backgroundColor' risks causing data races
+    await applyBackground(backgroundColor)
+}
+#endif
+
+#if swift(>=6.0)
+/// A non-isolated function that accepts non-`Sendable` parameters which must be safe to use at callsites.
+func sending_updateStyle(backgroundColor: sending ColorComponents) async {
     await applyBackground(backgroundColor)
 }
 #endif
@@ -96,11 +103,33 @@ actor Style {
     }
 }
 
+// MARK: Manual Synchronization
+
+extension RetroactiveColorComponents: @retroactive @unchecked Sendable {
+}
+
+/// An overload used by `retroactive_updateStyle` to match types.
+@MainActor
+func applyBackground(_ color: RetroactiveColorComponents	) {
+}
+
+/// A non-isolated function that accepts retroactively-`Sendable` parameters.
+func retroactive_updateStyle(backgroundColor: RetroactiveColorComponents) async {
+    await applyBackground(backgroundColor)
+}
+
 func exerciseBoundaryCrossingExamples() async {
     print("Isolation Boundary Crossing Examples")
 
 #if swift(<6.0)
     print("  - updateStyle(backgroundColor:) passing its argument unsafely")
+#endif
+
+#if swift(>=6.0)
+    print("  - using sending to allow safe usage of ColorComponents")
+    let nonSendableComponents = ColorComponents()
+
+    await sending_updateStyle(backgroundColor: nonSendableComponents)
 #endif
 
     print("  - using ColorComponents only from the main actor")
@@ -137,4 +166,9 @@ func exerciseBoundaryCrossingExamples() async {
     let actor = Style(background: actorComponents)
 
     await actor.applyBackground()
+
+    print("  - using a retroactive unchecked Sendable argument")
+    let retroactiveComponents = RetroactiveColorComponents()
+
+    await retroactive_updateStyle(backgroundColor: retroactiveComponents)
 }
