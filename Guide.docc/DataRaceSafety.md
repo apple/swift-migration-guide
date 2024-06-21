@@ -477,6 +477,17 @@ the surrounding code.
 The compiler will still produce an error should any unsafe accesses to the
 `chicken` variable ever be introduced.
 
+```swift
+func populate(island: Island) async {
+    let chicken = Chicken()
+
+    await island.adopt(chicken)
+
+    // this would result in an error
+    chicken.eat(food: Pineapple())
+}
+```
+
 [RBI]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md
 
 Region-based isolation works without any code changes.
