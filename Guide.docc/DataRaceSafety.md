@@ -480,7 +480,7 @@ The compiler will still produce an error should any unsafe accesses to the
 [RBI]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md
 
 Region-based isolation works without any code changes.
-But a function's parameters and return values can also explicitly require
+But a function's parameters and return values can also explicitly state
 that they support crossing domains using this mechanism.
 
 ```swift
