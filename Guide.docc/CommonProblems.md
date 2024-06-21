@@ -402,10 +402,10 @@ Incorporating will be easiest if the conformance is only used internally by
 
 ## Crossing Isolation Boundaries
 
-Any value that needs to move from one isolation domain to another
-must either be `Sendable` or must preserve mutually exclusive access.
-Using values with types that do not satisfy these requirements in contexts
-that require them is a very common problem.
+The compiler will only permit a value to move from one isolation domain to
+another when it can prove it will not introduce data races.
+Attempting to use values that do not satsify this requirement in contexts that
+can cross isolation boundaries is a very common problem.
 And because libraries and frameworks may be updated to use Swift's
 concurrency features, these issues can come up even when your code hasn't
 changed.
