@@ -448,6 +448,64 @@ The Swift Programming Language.
 
 [Sendable Types]: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency#Sendable-Types
 
+#### Flow-Sensitive Isolation Analysis
+
+The `Sendable` protocol is used to express thread-safety for a type as a
+whole.
+But there are situations when a particular _instance_ of a non-`Sendable`
+type is being used in a safe way.
+The compiler is often capable of inferring this safety through
+flow-sensitive analysis known as [region-based isolation][RBI].
+
+Region-based isolation allows the compiler to permit instances of
+non-`Sendable` types to cross isolation domains when it can prove doing
+so cannot introduce data races.
+
+```swift
+func populate(island: Island) async {
+    let chicken = Chicken()
+
+    await island.adopt(chicken)
+}
+```
+
+Here, the compiler can correctly reason that even though `chicken` has a
+non-`Sendable` type, allowing it to cross into the `island` isolation domain is
+safe.
+However, this exception to `Sendable` checking is inherently contigent on
+the surrounding code.
+The compiler will still produce an error should any unsafe accesses to the
+`chicken` variable ever be introduced.
+
+```swift
+func populate(island: Island) async {
+    let chicken = Chicken()
+
+    await island.adopt(chicken)
+
+    // this would result in an error
+    chicken.eat(food: Pineapple())
+}
+```
+
+[RBI]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md
+
+Region-based isolation works without any code changes.
+But a function's parameters and return values can also explicitly state
+that they support crossing domains using this mechanism.
+
+```swift
+func populate(island: Island, with chicken: sending Chicken) async {
+    await island.adopt(chicken)
+}
+```
+
+The compiler can now provide the guarantee that at all call sites, the
+`chicken` parameter will never be subject to unsafe acceses.
+This is a relaxing an otherwise significant constraint.
+Without `sending`, this function would only be possible to implement by
+requiring that `Chicken` first conform to `Sendable`.
+
 ### Actor-Isolated Types
 
 Actors are not value types, but because they protect all of their state
