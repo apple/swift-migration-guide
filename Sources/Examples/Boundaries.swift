@@ -81,9 +81,24 @@ func globalActorIsolated_updateStyle(backgroundColor: GlobalActorIsolatedColorCo
     applyBackground(backgroundColor)
 }
 
+// MARK: actor isolation
+
+/// An actor that assumes the responsibility of managing the non-Sendable data.
+actor Style {
+    private var background: ColorComponents
+
+    init(background: ColorComponents) {
+        self.background = background
+    }
+
+    func applyBackground() {
+        // make use of background here
+    }
+}
+
 func exerciseBoundaryCrossingExamples() async {
     print("Isolation Boundary Crossing Examples")
-    
+
 #if swift(<6.0)
     print("  - updateStyle(backgroundColor:) passing its argument unsafely")
 #endif
@@ -115,4 +130,11 @@ func exerciseBoundaryCrossingExamples() async {
     let components = await GlobalActorIsolatedColorComponents()
 
     await globalActorIsolated_updateStyle(backgroundColor: components)
+
+    print("  - using an actor")
+    let actorComponents = ColorComponents()
+
+    let actor = Style(background: actorComponents)
+
+    await actor.applyBackground()
 }
