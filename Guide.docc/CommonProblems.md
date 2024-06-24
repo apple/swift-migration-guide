@@ -557,6 +557,25 @@ Here, it does not matter than `ColorComponents` is not `Sendable`.
 By using `@Sendable` function that can compute the value, the lack of
 sendability is side-stepped entirely.
 
+### Sending Argument
+
+The compiler will permit non-`Sendable` values to cross an isolation boundary
+if can can prove it can be done safely.
+Functions that explicitly state they require this can use the values
+within their implementations with less restrictions.
+
+```swift
+func updateStyle(backgroundColor: sending ColorComponents) async {
+    // this boundary crossing can now be proven safe in all cases
+    await applyBackground(backgroundColor)
+}
+```
+
+A `sending` argument does impose some restrictions at call sites.
+But, this can still be easier or more appropriate than adding a
+`Sendable` conformance.
+This technique also works for types you do not control.
+
 ### Sendable Conformance
 
 When encountering problems related to crossing isolation domains, a very

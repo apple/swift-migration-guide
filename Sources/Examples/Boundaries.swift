@@ -60,6 +60,13 @@ func computedValue_updateStyle(using backgroundColorProvider: @Sendable () -> Co
 #endif
 }
 
+#if swift(>=6.0)
+/// A function that uses a sending parameter to leverage region-based isolation.
+func sendingValue_updateStyle(backgroundColor: sending ColorComponents) async {
+    await applyBackground(backgroundColor)
+}
+#endif
+
 // MARK: Global Isolation
 /// An overload used by `globalActorIsolated_updateStyle` to match types.
 @MainActor
@@ -96,6 +103,13 @@ func exerciseBoundaryCrossingExamples() async {
     await computedValue_updateStyle(using: {
         ColorComponents()
     })
+
+#if swift(>=6.0)
+    print("  - enable region-based isolation with a sending argument")
+    let capturableComponents = ColorComponents()
+
+    await sendingValue_updateStyle(backgroundColor: capturableComponents)
+#endif
 
     print("  - using a globally-isolated type")
     let components = await GlobalActorIsolatedColorComponents()
