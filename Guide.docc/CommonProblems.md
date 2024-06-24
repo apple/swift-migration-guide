@@ -92,7 +92,7 @@ disallow mutation, guaranteeing safe read-only access.
 let supportedStyleCount = 42
 ```
 
-A constant value can also be expressed with a computed property.
+A global value can also be expressed with a computed property.
 This is semantically equivalent to a `let` constant, but could have
 different impacts on a final linked artifact.
 
