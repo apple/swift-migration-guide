@@ -45,7 +45,7 @@ you are doing so statically. Isolation can be a part of these static
 declarations.
 
 There are cases, however, where the type system alone cannot sufficiently
-describe a system's behavior. An example could be an Objective-C type
+describe runtime behavior. An example could be an Objective-C type
 that has been exposed to Swift. This declaration, made outside of Swift code,
 may not provide enough information to the compiler to ensure safe usage. To
 accommodate these situations, there are additional features that allow you
