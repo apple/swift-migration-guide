@@ -31,7 +31,7 @@ Or, you may have been waiting for the Swift 6 release to begin using them.
 Regardless of where your project is in this process, this guide provides
 concepts and practical help to ease the migration.
 
-Here you will find articles and code examples that will:
+You will find articles and code examples here that:
 
 - Explain the concepts used by Swift's data-race safety model.
 - Outline a possible way to get started with migration.
