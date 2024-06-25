@@ -656,7 +656,7 @@ it `Sendable` should not be your first approach.
 It is often easier to try other techniques first, falling back to
 manual synchronization only when truly necessary.
 
-#### Retroative Sendable Conformance
+#### Retroactive Sendable Conformance
 
 Your dependencies may also expose types that are using manual synchronization.
 This is usually visible only via documentation.
@@ -671,7 +671,7 @@ Because `Sendable` is a marker protocol, a retroactive conformance
 does not have direct binary compatibility issues.
 However, it should still be used with extreme caution.
 Types that use manual synchronization can come with conditions or
-exceptions to their safety that may not completely match the sematics of
+exceptions to their safety that may not completely match the semantics of
 `Sendable`.
 Further, you should be _particularly_ careful about using this technique
 for types that are part of your system's public API.
