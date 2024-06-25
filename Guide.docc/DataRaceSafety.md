@@ -225,7 +225,7 @@ but that doesn't mean you must always manually start one.
 Typically, asynchronous functions do not need to be aware of the
 task running them.
 In fact, tasks can often begin at a much higher level,
-within an application framework, or even at the root of a program.
+within an application framework, or even at the entry point of the program.
 
 Tasks may run concurrently with one another,
 but each individual task only executes one function at a time.
