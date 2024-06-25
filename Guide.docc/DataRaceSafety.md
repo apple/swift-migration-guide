@@ -529,9 +529,6 @@ class ChickenValley {
 }
 ```
 
-Being `Sendable`, actor and global-actor-isolated types are always safe
-to pass across isolation boundaries.
-
 ### Reference Types
 
 Unlike value types, reference types cannot be implicitly `Sendable`.
