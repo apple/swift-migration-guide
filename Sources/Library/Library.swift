@@ -21,6 +21,15 @@ public struct ColorComponents {
     }
 }
 
+/// A variant of `ColorComponents` that could be marked as Sendable
+public struct RetroactiveColorComponents {
+    public let red: Float = 1.0
+    public let green: Float = 1.0
+    public let blue: Float = 1.0
+
+    public init() {}
+}
+
 /// Explicitly-Sendable variant of `ColorComponents`.
 public struct SendableColorComponents : Sendable {
     public let red: Float = 1.0
