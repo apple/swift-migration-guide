@@ -394,11 +394,11 @@ isolation boundary.
 Values are only ever permitted to cross an isolation boundary where there
 is no potential for concurrent access to shared mutable state.
 
-Values can cross boundaries directly, via asychronous function calls.
+Values can cross boundaries directly, via asynchronous function calls.
 When you call an asynchronous function with a _different_ isolation domain,
 the parameters and return value need to move into that domain.
 Values can also cross boundaries indirectly when captured by closures.
-Closures introduce many potential opportunities for concurrency accesses.
+Closures introduce many potential opportunities for concurrent accesses.
 They can be created in one domain and then executed in another.
 They can even be executed in multiple, different domains.
 
