@@ -387,7 +387,7 @@ The Swift Programming Language.
 Isolation domains protect their mutable state, but useful programs need more
 than just protection. They have to communicate and coordinate,
 often by passing data back and forth.
-Moving values into or out of an isolation domain is known as crossing an
+Moving values into or out of an isolation domain is known as _crossing_ an
 isolation boundary.
 
 Values are only ever permitted to cross an isolation boundary where there
