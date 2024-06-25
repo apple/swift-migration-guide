@@ -405,10 +405,8 @@ They can even be executed in multiple, different domains.
 
 In some cases, all values of a particular type are safe to pass across
 isolation boundaries because thread-safety is a property of the type itself.
-This thread-safe property of types is represented by a conformance to the
-`Sendable` protocol.
-When you see a conformance to `Sendable` in documentation,
-it means the given type is thread safe,
+This is represented by the `Sendable` protocol.
+A conformance to `Sendable` means the given type is thread safe,
 and values of the type can be shared across arbitrary isolation domains
 without introducing a risk of data races.
 
