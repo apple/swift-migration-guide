@@ -86,7 +86,6 @@ These domains will always fall into one of three categories:
 Functions and variables do not have to be a part of an explicit isolation
 domain.
 In fact, a lack of isolation is the default, called _non-isolated_.
-This absence of isolation behaves just like a domain all to itself.
 Because all the data isolation rules apply,
 there is no way for non-isolated code to mutate state protected in another
 domain.
