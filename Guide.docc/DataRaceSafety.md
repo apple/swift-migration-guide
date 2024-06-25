@@ -534,8 +534,8 @@ class ChickenValley {
 Unlike value types, reference types cannot be implicitly `Sendable`.
 And while they can be made `Sendable`,
 doing so comes with a number of constraints.
-To make a class `Sendable`, it must contain no mutable state.
-And any immutable properties must also be `Sendable`.
+To make a class `Sendable` it must contain no mutable state and all
+immutable properties must also be `Sendable`.
 Further, the compiler can only validate the implementation of final classes.
 
 ```swift
