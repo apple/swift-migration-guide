@@ -242,7 +242,7 @@ actor instance, a global actor, or could be non-isolated.
 This isolation can be established manually, but can also be inherited
 automatically based on context.
 Task isolation, just like all other Swift code, determines what mutable state
-they can access.
+is accessible.
 
 Tasks can run both synchronous and asynchronous code. Regardless of the
 structure and how many tasks are involved, functions in the same isolation
