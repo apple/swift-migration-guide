@@ -130,8 +130,7 @@ access from any other domain.
 
 Actors give the programmer a way to define an isolation domain,
 along with methods that operate within that domain.
-All stored instance properties of an actor are isolated to the enclosing
-actor instance.
+All stored properties of an actor are isolated to the enclosing actor instance.
 
 ```swift
 actor Island {
