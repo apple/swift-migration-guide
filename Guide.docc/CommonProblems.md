@@ -620,6 +620,21 @@ But further, data that is passed into or out of the actor may itself
 need to cross the isolation boundary.
 This can result in the need for yet more `Sendable` types.
 
+```swift
+actor Style {
+    private var background: ColorComponents
+
+    func applyBackground(_ color: ColorComponents) {
+        // make use of non-Sendable data here
+    }
+}
+```
+
+By moving both the non-Sendable data *and* operations on that data into the
+actor, no isolation boundaries need to be crossed.
+This provides a `Sendable` interface to those operations that can be freely
+accessed from any asynchronous context.
+
 #### Manual Synchronization
 
 If you have a type that is already doing manual synchronization, you can
