@@ -420,7 +420,7 @@ types in Swift are implicitly `Sendable` when all their stored properties
 are also Sendable.
 However, this implicit conformance is not visible outside of their
 defining module.
-Making a class `Sendable` is part of its public API contract,
+Making a type `Sendable` is part of its public API contract
 and must always be done explicitly.
 
 ```swift
