@@ -15,8 +15,8 @@ number of warnings and errors.
 _Don't_ get overwhelmed!
 Most of these can be tracked down to a much smaller set of root causes.
 And these causes, frequently, are a result of common patterns which aren't 
-just easy to fix, but can also very instructive in helping to understand
-Swift's data isolation model.
+just easy to fix, but can also be very instructive while learning about
+Swift's concurrency system.
 
 ## Unsafe Global and Static Variables
 
