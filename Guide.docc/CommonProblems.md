@@ -1,6 +1,6 @@
 # Common Compiler Errors
 
-Identify, understand, and address common problems you'll encounter while
+Identify, understand, and address common problems you can encounter while
 working with Swift concurrency.
 
 The data isolation guarantees made by the compiler affect all Swift code.
