@@ -469,8 +469,8 @@ removing the conformance is an API-breaking change.
 
 Even if the type in another module is actually `Sendable`, it is not always
 possible to modify its definition.
-In this case, you can use a `@preconcurrency import` to suppress errors until
-the library is updated.
+In this case, you can use a `@preconcurrency import` to downgrade diagnostics
+until the library is updated.
 
 ```swift
 // ColorComponents defined here
@@ -485,8 +485,8 @@ func updateStyle(backgroundColor: ColorComponents) async {
 With the addition of this `@preconcurrency import`,
 `ColorComponents` remains non-`Sendable`.
 However, the compiler's behavior will be altered.
-When using the Swift 6 language mode, the error produced here will be downgraded
-to a warning.
+When using the Swift 6 language mode,
+the error produced here will be downgraded to a warning.
 The Swift 5 language mode will produce no diagnostics at all.
 
 ### Latent Isolation
