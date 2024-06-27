@@ -269,11 +269,9 @@ protocol Styler {
 
 #### Asynchronous Requirements
 
-For methods that implement synchronous protocol requirements, either the
-isolation of the method must match the isolation of the requirement exactly,
-or the method must be `nonisolated`, meaning it can be called from
-any isolation domain without risk of data races. Making a requirement
-asynchronous offers a lot more flexibility over the isolation in
+For methods that implement synchronous protocol requirements the isolation
+of implementations must match exactly.
+Making a requirement _asynchronous_ offers more flexibility for
 conforming types.
 
 ```swift
