@@ -239,21 +239,26 @@ protocol Styler {
 }
 ```
 
-Marking a protocol with a global actor attribute implies global actor isolation
-on all protocol requirements and extension methods. The global actor is also
-inferred on conforming types when the conformance is not declared in an
-extension.
+Marking a protocol with a global actor attribute will infer isolation
+for the entire scope of the conformance.
+This can apply to a conforming type as a whole if the protocol conformance is
+not declared in an extension.
 
 Per-requirement isolation has a narrower impact on actor isolation inference,
-because inference only applies to the implementation of that requirement. It
-does not impact the inferred isolation of protocol extensions or other methods
-on the conforming type. This approach should be favored if it makes sense to
-have conforming types that aren't necessarily also tied to the same global actor.
+because it only applies to the implementation of that specific requirement.
+It does not impact the inferred isolation of protocol extensions or other
+methods on the conforming type.
+This approach should be favored if it makes sense to have conforming types
+that aren't necessarily also tied to the same global actor.
 
 Either way, changing the isolation of a protocol can affect the isolation of
 conforming types and it can impose restrictions on generic code using the
-protocol in a generic requirement. You can stage in diagnostics caused by
-adding global actor isolation on a protocol using `@preconcurrency`:
+protocol.
+
+You can stage in diagnostics caused by adding global actor isolation on a
+protocol using `@preconcurrency`.
+This will preserve source compatibility with clients that have not yet
+begun adopting concurrency.
 
 ```swift
 @preconcurrency @MainActor
