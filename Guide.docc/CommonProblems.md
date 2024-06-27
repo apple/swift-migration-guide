@@ -72,7 +72,7 @@ func addNewStyle() {
 }
 ```
 
-One way to address the problem is by changing variable's isolation.
+One way to address the problem is by changing the variable's isolation.
 
 ```swift
 @MainActor
