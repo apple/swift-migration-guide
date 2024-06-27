@@ -341,7 +341,7 @@ and the issue instead is only caused by the conforming type.
 
 #### Non-Isolated
 
-Even a completely non-isolated function can still be useful.
+Even a completely non-isolated function could still be useful.
 
 ```swift
 @MainActor
@@ -353,11 +353,10 @@ class WindowStyler: Styler {
 }
 ```
 
-The downside to such an implementation is that isolated state and
-functions become unavailable.
-This is definitely a major constraint, but could still be
-appropriate, especially if it is used exclusively as a source of
-instance-independent configuration.
+The constraint on this implementation is isolated state and functions
+become unavailable.
+This can still be an appropriate solution, especially if the function is used
+as a source of instance-independent configuration.
 
 #### Conformance by Proxy
 
