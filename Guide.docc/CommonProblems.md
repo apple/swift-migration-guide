@@ -280,9 +280,8 @@ protocol Styler {
 }
 ```
 
-Because `async` methods guarantee isolation by switching to the corresponding
-actor in the implementation, it's possible to satisfy a non-isolated `async`
-protocol requirement with an isolated method:
+It's possible to satisfy a non-isolated `async` protocol requirement with
+an isolated method.
 
 ```swift
 @MainActor
