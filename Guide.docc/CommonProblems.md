@@ -94,7 +94,7 @@ let supportedStyleCount = 42
 
 If there is synchronization in place that protects this variable in a way that
 is invisible to the compiler, you can disable all isolation checking for
-`supportedStyleCount` using the `nonisolated(unsafe)` keyword:
+`supportedStyleCount` using `nonisolated(unsafe)`.
 
 ```swift
 /// This value is only ever accessed while holding `styleLock`.
