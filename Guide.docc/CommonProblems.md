@@ -681,7 +681,8 @@ see the associated [Swift evolution proposal][SE-0364].
 #### Sendable Reference Types
 
 It is possible for reference types to be validated as `Sendable` without
-the `unchecked` qualifier, but this is only done under very narrow circumstances.
+the `unchecked` qualifier,
+but this is only done under very specific circumstances.
 
 To allow a checked `Sendable` conformance, a class:
 
