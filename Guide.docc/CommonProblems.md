@@ -150,11 +150,8 @@ directly.
 
 ## Protocol Conformance Isolation Mismatch
 
-A protocol defines requirements that a conforming type must satisfy.
-Swift ensures that clients of a protocol can interact with its methods and
-properties in a way that respects data isolation.
-To do this, both the protocol itself and its requirements must specify
-static isolation.
+A protocol defines requirements that a conforming type must satisfy,
+including static isolation.
 This can result in isolation mismatches between a protocol's declaration and
 conforming types.
 
