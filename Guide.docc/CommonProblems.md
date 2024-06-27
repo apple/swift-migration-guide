@@ -700,10 +700,10 @@ final class Style: Sendable {
 }
 ```
 
-A reference type that conforms to `Sendable` is sometimes a sign that a struct 
-would be preferable, but there are circumstances where reference semantics need
-to be preserved, or where compatibility with a mixed Swift/Objective-C code base 
-is required.
+A reference type that conforms to `Sendable` is sometimes a sign that a value
+type would be preferable.
+But there are circumstances where reference semantics need to be preserved,
+or where compatibility with a mixed Swift/Objective-C code base is required.
 
 #### Using Composition
 
