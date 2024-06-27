@@ -462,9 +462,8 @@ public struct ColorComponents: Sendable {
 
 Even when trivial, adding `Sendable` conformance should always be
 done with care.
-Remember that `Sendable` is a guarantee of thread-safety, and part of a
-type's API contract.
-Removing the conformance is an API-breaking change.
+Remember that `Sendable` is a guarantee of thread-safety and
+removing the conformance is an API-breaking change.
 
 ### Preconcurrency Import
 
