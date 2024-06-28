@@ -390,15 +390,14 @@ than just protection. They have to communicate and coordinate,
 often by passing data back and forth.
 Moving values into or out of an isolation domain is known as crossing an
 isolation boundary.
-
 Values are only ever permitted to cross an isolation boundary where there
 is no potential for concurrent access to shared mutable state.
-Values can cross a boundary directly, via asychronous function calls.
-They can also cross boundaries indirectly when captured by closures.
 
+Values can cross boundaries directly, via asynchronous function calls.
 When you call an asynchronous function with a _different_ isolation domain,
-the parameters and return value need to cross a boundary.
-Closures introduce many opportunities to cross isolation boundaries.
+the parameters and return value need to move into that domain.
+Values can also cross boundaries indirectly when captured by closures.
+Closures introduce many potential opportunities for concurrent accesses.
 They can be created in one domain and then executed in another.
 They can even be executed in multiple, different domains.
 
