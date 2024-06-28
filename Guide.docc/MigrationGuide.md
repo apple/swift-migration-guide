@@ -73,6 +73,7 @@ For more information, see the [contributing][] document.
 - <doc:Swift6Mode>
 - <doc:CommonProblems>
 - <doc:IncrementalAdoption>
+- <doc:SourceCompatibility>
 
 ### Swift Concurrency in Depth
 
