@@ -52,19 +52,10 @@ func sendable_updateStyle(backgroundColor: SendableColorComponents) async {
 
 /// A Sendable function is used to compute the value in a different isolation domain.
 func computedValue_updateStyle(using backgroundColorProvider: @Sendable () -> ColorComponents) async {
-#if swift(<6.0)
-    // pass backgroundColorProvider into the MainActor here
-    await MainActor.run {
-        // invoke it in this domain to actually create the needed value
-        let components = backgroundColorProvider()
-        applyBackground(components)
-    }
-#else
     // The Swift 6 compiler can automatically determine this value is
     // being transferred in a safe way
     let components = backgroundColorProvider()
     await applyBackground(components)
-#endif
 }
 
 #if swift(>=6.0)
