@@ -19,8 +19,8 @@ directly at the command line, pass `-swift-version 6`:
 invocation using the `-Xswiftc` flag:
 
 ```
-~ swift build -Xswiftc -swift-version 6
-~ swift test -Xswiftc -swift-version 6
+~ swift build -Xswiftc -swift-version -Xswiftc 6
+~ swift test -Xswiftc -swift-version -Xswiftc 6
 ```
 
 ### Package manifest
