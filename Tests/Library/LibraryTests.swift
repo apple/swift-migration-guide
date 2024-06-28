@@ -22,3 +22,18 @@ struct LibraryTest {
         await #expect(color.red == 1.0)
     }
 }
+
+extension LibraryTest {
+    @Test func testCallbackOperation() async {
+        await confirmation() { completion in
+            // function explicitly opts out of an generated async version
+            // so it requires a continuation here
+            await withCheckedContinuation { continuation in
+                JPKJetPack.jetPackConfiguration {
+                    completion()
+                    continuation.resume()
+                }
+            }
+        }
+    }
+}
