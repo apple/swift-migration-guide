@@ -45,7 +45,7 @@ you are doing so statically. Isolation can be a part of these static
 declarations.
 
 There are cases, however, where the type system alone cannot sufficiently
-describe a system's behavior. An example could be an Objective-C type
+describe runtime behavior. An example could be an Objective-C type
 that has been exposed to Swift. This declaration, made outside of Swift code,
 may not provide enough information to the compiler to ensure safe usage. To
 accommodate these situations, there are additional features that allow you
@@ -130,8 +130,7 @@ access from any other domain.
 
 Actors give the programmer a way to define an isolation domain,
 along with methods that operate within that domain.
-All stored instance properties of an actor are isolated to the enclosing
-actor instance.
+All stored properties of an actor are isolated to the enclosing actor instance.
 
 ```swift
 actor Island {
@@ -226,7 +225,7 @@ but that doesn't mean you must always manually start one.
 Typically, asynchronous functions do not need to be aware of the
 task running them.
 In fact, tasks can often begin at a much higher level,
-within an application framework, or even at the root of a program.
+within an application framework, or even at the entry point of the program.
 
 Tasks may run concurrently with one another,
 but each individual task only executes one function at a time.
@@ -243,7 +242,7 @@ actor instance, a global actor, or could be non-isolated.
 This isolation can be established manually, but can also be inherited
 automatically based on context.
 Task isolation, just like all other Swift code, determines what mutable state
-they can access.
+is accessible.
 
 Tasks can run both synchronous and asynchronous code. Regardless of the
 structure and how many tasks are involved, functions in the same isolation
@@ -388,7 +387,7 @@ The Swift Programming Language.
 Isolation domains protect their mutable state, but useful programs need more
 than just protection. They have to communicate and coordinate,
 often by passing data back and forth.
-Moving values into or out of an isolation domain is known as crossing an
+Moving values into or out of an isolation domain is known as _crossing_ an
 isolation boundary.
 Values are only ever permitted to cross an isolation boundary where there
 is no potential for concurrent access to shared mutable state.
@@ -405,10 +404,8 @@ They can even be executed in multiple, different domains.
 
 In some cases, all values of a particular type are safe to pass across
 isolation boundaries because thread-safety is a property of the type itself.
-This thread-safe property of types is represented by a conformance to the
-`Sendable` protocol.
-When you see a conformance to `Sendable` in documentation,
-it means the given type is thread safe,
+This is represented by the `Sendable` protocol.
+A conformance to `Sendable` means the given type is thread safe,
 and values of the type can be shared across arbitrary isolation domains
 without introducing a risk of data races.
 
@@ -422,7 +419,7 @@ types in Swift are implicitly `Sendable` when all their stored properties
 are also Sendable.
 However, this implicit conformance is not visible outside of their
 defining module.
-Making a class `Sendable` is part of its public API contract,
+Making a type `Sendable` is part of its public API contract
 and must always be done explicitly.
 
 ```swift
@@ -531,16 +528,13 @@ class ChickenValley {
 }
 ```
 
-Being `Sendable`, actor and global-actor-isolated types are always safe
-to pass across isolation boundaries.
-
 ### Reference Types
 
 Unlike value types, reference types cannot be implicitly `Sendable`.
 And while they can be made `Sendable`,
 doing so comes with a number of constraints.
-To make a class `Sendable`, it must contain no mutable state.
-And any immutable properties must also be `Sendable`.
+To make a class `Sendable` it must contain no mutable state and all
+immutable properties must also be `Sendable`.
 Further, the compiler can only validate the implementation of final classes.
 
 ```swift
