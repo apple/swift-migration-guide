@@ -1,6 +1,6 @@
 # Common Compiler Errors
 
-Identify, understand, and address common problems you'll encounter while
+Identify, understand, and address common problems you can encounter while
 working with Swift concurrency.
 
 The data isolation guarantees made by the compiler affect all Swift code.
@@ -15,8 +15,8 @@ number of warnings and errors.
 _Don't_ get overwhelmed!
 Most of these can be tracked down to a much smaller set of root causes.
 And these causes, frequently, are a result of common patterns which aren't 
-just easy to fix, but can also very instructive in helping to understand
-Swift's data isolation model.
+just easy to fix, but can also be very instructive while learning about
+Swift's concurrency system.
 
 ## Unsafe Global and Static Variables
 
@@ -72,7 +72,7 @@ func addNewStyle() {
 }
 ```
 
-One way to address the problem is by changing variable's isolation.
+One way to address the problem is by changing the variable's isolation.
 
 ```swift
 @MainActor
@@ -94,7 +94,7 @@ let supportedStyleCount = 42
 
 If there is synchronization in place that protects this variable in a way that
 is invisible to the compiler, you can disable all isolation checking for
-`supportedStyleCount` using the `nonisolated(unsafe)` keyword:
+`supportedStyleCount` using `nonisolated(unsafe)`.
 
 ```swift
 /// This value is only ever accessed while holding `styleLock`.
@@ -150,11 +150,8 @@ directly.
 
 ## Protocol Conformance Isolation Mismatch
 
-A protocol defines requirements that a conforming type must satisfy.
-Swift ensures that clients of a protocol can interact with its methods and
-properties in a way that respects data isolation.
-To do this, both the protocol itself and its requirements must specify
-static isolation.
+A protocol defines requirements that a conforming type must satisfy,
+including static isolation.
 This can result in isolation mismatches between a protocol's declaration and
 conforming types.
 
@@ -242,21 +239,26 @@ protocol Styler {
 }
 ```
 
-Marking a protocol with a global actor attribute implies global actor isolation
-on all protocol requirements and extension methods. The global actor is also
-inferred on conforming types when the conformance is not declared in an
-extension.
+Marking a protocol with a global actor attribute will infer isolation
+for the entire scope of the conformance.
+This can apply to a conforming type as a whole if the protocol conformance is
+not declared in an extension.
 
 Per-requirement isolation has a narrower impact on actor isolation inference,
-because inference only applies to the implementation of that requirement. It
-does not impact the inferred isolation of protocol extensions or other methods
-on the conforming type. This approach should be favored if it makes sense to
-have conforming types that aren't necessarily also tied to the same global actor.
+because it only applies to the implementation of that specific requirement.
+It does not impact the inferred isolation of protocol extensions or other
+methods on the conforming type.
+This approach should be favored if it makes sense to have conforming types
+that aren't necessarily also tied to the same global actor.
 
 Either way, changing the isolation of a protocol can affect the isolation of
 conforming types and it can impose restrictions on generic code using the
-protocol in a generic requirement. You can stage in diagnostics caused by
-adding global actor isolation on a protocol using `@preconcurrency`:
+protocol.
+
+You can stage in diagnostics caused by adding global actor isolation on a
+protocol using `@preconcurrency`.
+This will preserve source compatibility with clients that have not yet
+begun adopting concurrency.
 
 ```swift
 @preconcurrency @MainActor
@@ -267,11 +269,9 @@ protocol Styler {
 
 #### Asynchronous Requirements
 
-For methods that implement synchronous protocol requirements, either the
-isolation of the method must match the isolation of the requirement exactly,
-or the method must be `nonisolated`, meaning it can be called from
-any isolation domain without risk of data races. Making a requirement
-asynchronous offers a lot more flexibility over the isolation in
+For methods that implement synchronous protocol requirements the isolation
+of implementations must match exactly.
+Making a requirement _asynchronous_ offers more flexibility for
 conforming types.
 
 ```swift
@@ -280,9 +280,8 @@ protocol Styler {
 }
 ```
 
-Because `async` methods guarantee isolation by switching to the corresponding
-actor in the implementation, it's possible to satisfy a non-isolated `async`
-protocol requirement with an isolated method:
+It's possible to satisfy a non-isolated `async` protocol requirement with
+an isolated method.
 
 ```swift
 @MainActor
@@ -342,7 +341,7 @@ and the issue instead is only caused by the conforming type.
 
 #### Non-Isolated
 
-Even a completely non-isolated function can still be useful.
+Even a completely non-isolated function could still be useful.
 
 ```swift
 @MainActor
@@ -354,11 +353,10 @@ class WindowStyler: Styler {
 }
 ```
 
-The downside to such an implementation is that isolated state and
-functions become unavailable.
-This is definitely a major constraint, but could still be
-appropriate, especially if it is used exclusively as a source of
-instance-independent configuration.
+The constraint on this implementation is isolated state and functions
+become unavailable.
+This can still be an appropriate solution, especially if the function is used
+as a source of instance-independent configuration.
 
 #### Conformance by Proxy
 
@@ -464,16 +462,15 @@ public struct ColorComponents: Sendable {
 
 Even when trivial, adding `Sendable` conformance should always be
 done with care.
-Remember that `Sendable` is a guarantee of thread-safety, and part of a
-type's API contract.
-Removing the conformance is an API-breaking change.
+Remember that `Sendable` is a guarantee of thread-safety and
+removing the conformance is an API-breaking change.
 
 ### Preconcurrency Import
 
 Even if the type in another module is actually `Sendable`, it is not always
 possible to modify its definition.
-In this case, you can use a `@preconcurrency import` to suppress errors until
-the library is updated.
+In this case, you can use a `@preconcurrency import` to downgrade diagnostics
+until the library is updated.
 
 ```swift
 // ColorComponents defined here
@@ -488,8 +485,8 @@ func updateStyle(backgroundColor: ColorComponents) async {
 With the addition of this `@preconcurrency import`,
 `ColorComponents` remains non-`Sendable`.
 However, the compiler's behavior will be altered.
-When using the Swift 6 language mode, the error produced here will be downgraded
-to a warning.
+When using the Swift 6 language mode,
+the error produced here will be downgraded to a warning.
 The Swift 5 language mode will produce no diagnostics at all.
 
 ### Latent Isolation
@@ -684,7 +681,8 @@ see the associated [Swift evolution proposal][SE-0364].
 #### Sendable Reference Types
 
 It is possible for reference types to be validated as `Sendable` without
-the `unchecked` qualifier, but this is only done under very narrow circumstances.
+the `unchecked` qualifier,
+but this is only done under very specific circumstances.
 
 To allow a checked `Sendable` conformance, a class:
 
@@ -702,10 +700,10 @@ final class Style: Sendable {
 }
 ```
 
-A reference type that conforms to `Sendable` is sometimes a sign that a struct 
-would be preferable, but there are circumstances where reference semantics need
-to be preserved, or where compatibility with a mixed Swift/Objective-C code base 
-is required.
+A reference type that conforms to `Sendable` is sometimes a sign that a value
+type would be preferable.
+But there are circumstances where reference semantics need to be preserved,
+or where compatibility with a mixed Swift/Objective-C code base is required.
 
 #### Using Composition
 
