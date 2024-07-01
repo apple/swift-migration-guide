@@ -34,7 +34,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "Swift5Examples",
-            dependencies: ["Library"],
+            dependencies:  ["Library", "ObjCLibrary"],
             swiftSettings: [
                 .swiftLanguageVersion(.v5),
                 .enableUpcomingFeature("StrictConcurrency"),
@@ -42,7 +42,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "Swift6Examples",
-            dependencies: ["Library"]
+            dependencies: ["Library", "ObjCLibrary"]
         )
     ]
 )
