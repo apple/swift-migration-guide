@@ -14,6 +14,11 @@ var globallyIsolated_supportedStyleCount = 42
 /// Version of `supportedStyleCount` that uses immutability.
 let constant_supportedStyleCount = 42
 
+/// Version of `supportedStyleCount` that uses a computed property.
+var computed_supportedStyleCount: Int {
+    42
+}
+
 /// Version of `supportedStyleCount` that uses manual synchronization via `sharedQueue`
 nonisolated(unsafe) var queueProtected_supportedStyleCount = 42
 
@@ -45,6 +50,9 @@ func exerciseGlobalExamples() async {
     await MainActor.run {
         print("  - accessing constant_supportedStyleCount from MainActor: ", constant_supportedStyleCount)
     }
+
+    // freely access the computed property from any isolation domain
+    print("  - accessing computed_supportedStyleCount when non-isolated: ", computed_supportedStyleCount)
 
     // access the manually-synchronized version... carefully
     manualSerialQueue.async {
