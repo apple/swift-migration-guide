@@ -36,7 +36,8 @@ let package = Package(
             name: "Swift5Examples",
             dependencies: ["Library"],
             swiftSettings: [
-                .swiftLanguageVersion(.v5)
+                .swiftLanguageVersion(.v5),
+                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
         .executableTarget(
