@@ -60,16 +60,12 @@ class StagedGloballyIsolatedWindowStyler: StagedGloballyIsolatedStyler {
 @MainActor
 class DynamicallyIsolatedStyler: Styler {
     nonisolated func applyStyle() {
-#if compiler(<6.0)
-        // temporarily disabled due to https://github.com/apple/swift/issues/74009
         MainActor.assumeIsolated {
             // MainActor state is available here
         }
-#endif
     }
 }
 
-#if compiler(>=6.0)
 /// A conforming type that uses a preconcurency conformance, which
 /// is a safer and more ergonomic version of DynamicallyIsolatedStyler.
 @MainActor
@@ -77,7 +73,6 @@ class PreconcurrencyConformanceStyler: @preconcurrency Styler {
     func applyStyle() {
     }
 }
-#endif
 
 // MARK: Non-Isolated
 
@@ -136,10 +131,8 @@ func exerciseConformanceMismatchExamples() async {
         print("  - using dynamic isolation")
         DynamicallyIsolatedStyler().applyStyle()
 
-#if swift(>=6.0)
         print("  - using a preconcurrency conformance")
         PreconcurrencyConformanceStyler().applyStyle()
-#endif
 
         let value = NonisolatedWindowStyler().primaryColorComponents
         print("  - accessing a non-isolated conformance: ", value)
