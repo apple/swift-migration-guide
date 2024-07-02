@@ -92,6 +92,17 @@ disallow mutation, guaranteeing safe read-only access.
 let supportedStyleCount = 42
 ```
 
+A global value can also be expressed with a computed property.
+If such property consistently returns the same constant value,
+this is semantically equivalent to a `let` constant as far as 
+observable values/effects are concerned:
+
+```swift
+var supportedStyleCount: Int {
+    42
+}
+```
+
 If there is synchronization in place that protects this variable in a way that
 is invisible to the compiler, you can disable all isolation checking for
 `supportedStyleCount` using `nonisolated(unsafe)`.
