@@ -93,8 +93,9 @@ let supportedStyleCount = 42
 ```
 
 A global value can also be expressed with a computed property.
-This is semantically equivalent to a `let` constant, but could have
-different impacts on a final linked artifact.
+If such property consistently returns the same constant value,
+this is semantically equivalent to a `let` constant as far as 
+observable values/effects are concerned:
 
 ```swift
 var supportedStyleCount: Int {
