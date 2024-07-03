@@ -371,9 +371,6 @@ The closure's type here is defined by `Task.init`.
 Despite that declaration not being isolated to any actor,
 this newly-created task will _inherit_ the `MainActor` isolation of its
 enclosing scope.
-
-It is important to note that this form of isolation inheritance must be done
-explicitly, using the `isolated(any)` annotation.
 Function types offer a number of mechanisms for controlling their
 isolation behavior, but by default they behave identically to other types.
 
