@@ -234,7 +234,7 @@ This code will compile without issue but crash at runtime.
 To workaround this, you can manually annotate the closure with `@Sendable.`
 This will prevent the compiler from inferring `MainActor` isolation.
 Because the compiler now knows actor isolation could change,
-it will require at await at the callsite.
+it will require a task at the callsite and an await in the task.
 
 ```swift
 @MainActor
@@ -243,7 +243,9 @@ class PersonalTransportation {
         JPKJetPack.jetPackConfiguration { @Sendable in
             // Sendable closures do not infer actor isolation,
             // making this context non-isolated
-            await self.applyConfiguration()
+            Task {
+                await self.applyConfiguration()
+            }
         }
     }
 
