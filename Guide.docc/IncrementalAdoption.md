@@ -36,7 +36,7 @@ _continuations_.
 
 ```swift
 func updateStyle(backgroundColor: ColorComponents) async {
-    withCheckedContinuation { continuation in
+    await withCheckedContinuation { continuation in
         updateStyle(backgroundColor: backgroundColor) {
             // ... do some work here ...
 
