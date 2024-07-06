@@ -44,7 +44,7 @@ Will introduce errors for any code that risks data races.
 [SE-0337]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0337-support-incremental-migration-to-concurrency-checking.md
 
 > Note: This feature implicitly also enables [`IsolatedDefaultValues`](#Isolated-default-value-expressions),
-[`IsolatedDefaultValues`](#Strict-concurrency-for-global-variables),
+[`GlobalConcurrency`](#Strict-concurrency-for-global-variables),
 and [`RegionBasedIsolation`](#Region-based-Isolation).
 
 ## Implicitly Opened Existentials
