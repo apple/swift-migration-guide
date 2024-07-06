@@ -493,7 +493,7 @@ func populate(island: Island, with chicken: sending Chicken) async {
 ```
 
 The compiler can now provide the guarantee that at all call sites, the
-`chicken` parameter will never be subject to unsafe acceses.
+`chicken` parameter will never be subject to unsafe access.
 This is a relaxing an otherwise significant constraint.
 Without `sending`, this function would only be possible to implement by
 requiring that `Chicken` first conform to `Sendable`.
