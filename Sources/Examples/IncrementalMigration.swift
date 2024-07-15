@@ -8,9 +8,10 @@ import ObjCLibrary
 actor LandingSite {
     private let queue = DispatchSerialQueue(label: "SerialQueue")
 
-    nonisolated var unownedExecutor: UnownedSerialExecutor {
-        queue.asUnownedSerialExecutor()
-    }
+	// this currently failed to build because of the @available usage, rdar://116684282
+//    nonisolated var unownedExecutor: UnownedSerialExecutor {
+//        queue.asUnownedSerialExecutor()
+//    }
 
     func acceptTransport(_ transport: JPKJetPack) {
         // this function will be running on queue
