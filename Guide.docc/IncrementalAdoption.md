@@ -254,6 +254,30 @@ class PersonalTransportation {
 }
 ```
 
+## Integrating DispatchSerialQueue with Actors
+
+By default, the mechanism actors use to schedule and execute work
+is system-defined.
+However you can override this to provide a custom implementation.
+The `DispatchSerialQueue` type includes built-in support for this facility.
+
+```swift
+actor LandingSite {
+    private let queue = DispatchSerialQueue(label: "something")
+
+    nonisolated var unownedExecutor: UnownedSerialExecutor {
+        queue.asUnownedSerialExecutor()
+    }
+
+    func acceptTransport(_ transport: PersonalTransportation) {
+        // this function will be running on queue
+    }
+}
+```
+
+This can be useful if you want to migrate a type towards the actor model
+while maintaining compatibility with code that depends on `DispatchQueue`.
+
 ## Backwards Compatibility
 
 It's important to keep in mind that static isolation, being part of the type
@@ -332,6 +356,7 @@ NS_SWIFT_ASYNC_NAME
 NS_SWIFT_ASYNC_NOTHROW
 NS_SWIFT_UNAVAILABLE_FROM_ASYNC(msg)
 ```
+
 ### Dealing with missing isolation annotations in Objective-C libraries
 
 While the SDKs and other Objective-C libraries make progress in adopting Swift concurrency,
