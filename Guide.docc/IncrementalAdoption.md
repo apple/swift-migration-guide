@@ -161,7 +161,6 @@ scope of changes gradual.
 The `assumeIsolated` method is synchronous and exists to recover isolation
 information from runtime back into the type-system by preventing execution
 if the assumption was incorrect.
-that would otherwise be invisible to the compiler.
 The `MainActor` type also has a method you can use to manually switch
 isolation in an asynchronous context.
 
