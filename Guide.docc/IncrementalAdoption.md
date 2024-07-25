@@ -230,6 +230,9 @@ When an un-migrated module hasn't yet done this, it will result in incorrect
 actor inference.
 This code will compile without issue but crash at runtime.
 
+> Note: It is not possible for the compiler to detect or diagnose the
+_lack_ of compiler-visible information.
+
 To workaround this, you can manually annotate the closure with `@Sendable.`
 This will prevent the compiler from inferring `MainActor` isolation.
 Because the compiler now knows actor isolation could change,
@@ -252,6 +255,13 @@ class PersonalTransportation {
     }
 }
 ```
+
+Alternatively, it is also possible to disable runtime isolation assertions
+for the module with the `-disable-dynamic-actor-isolation` compiler flag.
+This will suppress all runtime enforcement of dynamic actor isolation.
+
+> Warning: This flag should be used with caution.
+Disabling these runtime checks will permit data isolation violations.
 
 ## Integrating DispatchSerialQueue with Actors
 
