@@ -339,9 +339,7 @@ This inserts runtime checks to ensure that that static isolation
 of the conforming class is always enforced.
 
 > Note: To learn more about incremental adoption and dynamic isolation,
-see [Dynamic Isolation][]
-
-[Dynamic Isolation]: incrementaladoption#Dynamic-Isolation
+see <doc:IncrementalAdoption#Dynamic-Isolation>
 
 ### Isolated Conforming Type
 
