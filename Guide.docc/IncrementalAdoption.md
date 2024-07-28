@@ -469,7 +469,7 @@ Until the library fixes its annotation issue, you are able to witness the method
 @MainActor
 final class MyJetPack: NSJetPack {
   // Correct
-  override nonisolated class var readyForTakeoff: Bool {
+  override nonisolated class var supportsHighAltitude: Bool {
     true
   }
 }
