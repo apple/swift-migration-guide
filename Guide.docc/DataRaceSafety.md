@@ -350,10 +350,38 @@ But these are all examples of _declarations_.
 It is also possible to achieve a similar effect with function values, through
 isolation _inheritance_.
 
-A closure can capture the isolation at its declaration site, instead of the
-isolation being statically defined by its type.
-This mechanism may sound complex, but in practice it allows very natural
-behaviors.
+By default, closures are isolated to the same context they're formed in.
+For example:
+
+```swift
+@MainActor
+class Model { ... }
+
+@MainActor
+class C {
+    var models: [Model] = []
+
+    func mapModels<Value>(
+      _ keyPath: KeyPath<Model, Value>
+    ) -> some Collection<Value> {
+        models.lazy.map { $0[keyPath: keyPath] }
+    }
+}
+```
+
+In the above code, the closure to `LazySequence.map` has type
+`@escaping (Base.Element) -> U`. This closure must stay on the main
+actor where it was originally formed. This allows the closure to capture
+state or call isolated methods from the surrounding context.
+
+Closures that can run concurrently with the original context are marked
+explicitly through `@Sendable` and `sending` annotations described in later
+sections.
+
+For `async` closures that may be evaluated concurrently, the closure can still
+capture the isolation of the original context. This mechanism is used by the
+`Task` initializer so that the given operation is isolated to the original
+context by default, while still allowing explicit isolation to be specified:
 
 ```swift
 @MainActor
@@ -364,13 +392,17 @@ func eat(food: Pineapple) {
         // allowing the closure's body to inherit MainActor-isolation
         Chicken.prizedHen.eat(food: food)
     }
+
+    Task { @MyGlobalActor in
+        // this task is isolated to `MyGlobalActor`
+    }
 }
 ```
 
 The closure's type here is defined by `Task.init`.
 Despite that declaration not being isolated to any actor,
 this newly-created task will _inherit_ the `MainActor` isolation of its
-enclosing scope.
+enclosing scope unless an explicit global actor is written.
 Function types offer a number of mechanisms for controlling their
 isolation behavior, but by default they behave identically to other types.
 
