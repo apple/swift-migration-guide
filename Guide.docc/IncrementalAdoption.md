@@ -340,6 +340,7 @@ __attribute__((swift_attr(“@Sendable”)))
 __attribute__((swift_attr(“@_nonSendable”)))
 __attribute__((swift_attr("nonisolated")))
 __attribute__((swift_attr("@UIActor")))
+__attribute__((swift_attr("sending")))
 
 __attribute__((swift_async(none)))
 __attribute__((swift_async(not_swift_private, COMPLETION_BLOCK_INDEX))
@@ -357,6 +358,7 @@ NS_SWIFT_SENDABLE
 NS_SWIFT_NONSENDABLE
 NS_SWIFT_NONISOLATED
 NS_SWIFT_UI_ACTOR
+NS_SWIFT_SENDING
 
 NS_SWIFT_DISABLE_ASYNC
 NS_SWIFT_ASYNC(COMPLETION_BLOCK_INDEX)
