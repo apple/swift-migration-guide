@@ -49,7 +49,7 @@ let package = Package(
         .target(
             name: "NotQuiteReadyYet",
             swiftSettings: [
-                .swiftLanguageVersion(.v5)
+                .swiftLanguageMode(.v5)
             ]
         )
     ]
