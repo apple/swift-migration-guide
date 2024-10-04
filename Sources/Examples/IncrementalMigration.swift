@@ -28,7 +28,5 @@ func exerciseIncrementalMigrationExamples() async {
         let transport = JPKJetPack()
 
         await site.acceptTransport(transport)
-        await site.acceptTransport(transport)
-        await site.acceptTransport(transport)
     }
 }
