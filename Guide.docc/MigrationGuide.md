@@ -73,6 +73,7 @@ For more information, see the [contributing][] document.
 - <doc:CommonProblems>
 - <doc:IncrementalAdoption>
 - <doc:SourceCompatibility>
+- <doc:LibraryEvolution>
 
 ### Swift Concurrency in Depth
 
