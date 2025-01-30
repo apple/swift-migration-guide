@@ -4,8 +4,8 @@ Annotate library APIs for concurrency while preserving source and ABI
 compatibility.
 
 Concurrency annotations such as `@MainActor` and `@Sendable` can impact source
-and ABI compatibility that library authors should be aware of when annotating
-existing APIs.
+and ABI compatibility. Library authors should be aware of these implications when
+annotating existing APIs.
 
 ## Preconcurrency annotations
 
@@ -46,7 +46,9 @@ without breaking source or ABI compatibility.
 ### Conformances on concrete types
 
 Adding a `Sendable` conformance to a concrete type, including conditional
-conformances, is typically a source compatible change in practice:
+conformances, is typically a source compatible change in practice.
+
+**Source and ABI compatible:**
 
 ```diff
 -public struct S
@@ -66,15 +68,17 @@ parameters, is always an ABI compatible change.
 
 Adding a `Sendable` conformance requirement to a generic type or function is
 a source incompatible change, because it places a restriction on generic
-arguments passed by the client:
+arguments passed by the client.
+
+**Source and ABI incompatible:**
 
 ```diff
 -public func generic<T>
 +public func generic<T> where T: Sendable
 ```
 
-Apply `@preconcurrency` to the type or function declaration to downgrade
-requirement failures to warnings and preserve ABI:
+**To resolve:** Apply `@preconcurrency` to the type or function declaration to
+downgrade requirement failures to warnings and preserve ABI:
 
 ```swift
 @preconcurrency
@@ -86,13 +90,15 @@ public func generic<T> where T: Sendable { ... }
 Like generic requirements, adding `@Sendable` to a function type is a 
 source and ABI incompatible change:
 
+**Source and ABI incompatible:**
+
 ```diff
 -public func performConcurrently(completion: @escaping () -> Void)
 +public func performConcurrently(completion: @escaping @Sendable () -> Void)
 ```
 
-Apply `@preconcurrency` to the enclosing function declaration to downgrade
-requirement failures to warnings and preserve ABI:
+**To resolve:** Apply `@preconcurrency` to the enclosing function declaration
+to downgrade requirement failures to warnings and preserve ABI:
 
 ```swift
 @preconcurrency
@@ -104,7 +110,9 @@ public func performConcurrently(completion: @escaping @Sendable () -> Void)
 ### Protocols and types
 
 Adding `@MainActor` annotations to protocols or type declarations is a source
-and ABI incompatible change:
+and ABI incompatible change.
+
+**Source and ABI incompatible:**
 
 ```diff
 -public protocol P
@@ -151,7 +159,9 @@ Language affordances for precise control over the ABI of a declaration are
 ### Function declarations and types
 
 Adding `@MainActor` to a function declaration or a function type is a
-source and ABI incompatible change:
+source and ABI incompatible change.
+
+**Source and ABI incompatible:**
 
 ```diff
 -public func runOnMain()
@@ -161,8 +171,8 @@ source and ABI incompatible change:
 +public func performConcurrently(completion: @escaping @MainActor () -> Void)
 ```
 
-Apply `@preconcurrency` to the enclosing function declaration to downgrade
-requirement failures to warnings and preserve ABI:
+**To resolve:** Apply `@preconcurrency` to the enclosing function declaration
+to downgrade requirement failures to warnings and preserve ABI:
 
 ```swift
 @preconcurrency @MainActor
@@ -172,26 +182,45 @@ public func runOnMain() { ... }
 public func performConcurrently(completion: @escaping @MainActor () -> Void) { ... }
 ```
 
-## sending parameters and results
+## `sending` parameters and results
 
 Adding `sending` to a result lifts restrictions in client code, and is
 always a source and ABI compatible change:
+
+**Source and ABI compatible:**
 
 ```diff
 -public func getValue() -> NotSendable
 +public func getValue() -> sending NotSendable
 ```
 
-However, adding `sending` to a parameter is more restrictive at the caller:
+However, adding `sending` to a parameter is more restrictive at the caller.
+
+**Source and ABI incompatible:**
 
 ```diff
 -public func takeValue(_: NotSendable)
 +public func takeValue(_: sending NotSendable)
 ```
 
-Adding `sending` to a parameter also changes name mangling, so any adoption
-must preserve the mangling using `@_silgen_name`. Adopting `sending` in
-parameter position must preserve the ownership convention of parameters. No
+There is currently no way to stage in a new `sending` annotation on a parameter
+without breaking source compatibility.
+
+### Replacing `@Sendable` with `sending`
+
+Replacing an existing `@Sendable` annotation with `sending` on a closure
+parameter is a source compatible, ABI incompatible change.
+
+**Source compatible, ABI incompatible:**
+
+```diff
+-public func takeValue(_: @Sendable @escaping () -> Void)
++public func takeValue(_: sending @escaping () -> Void)
+```
+
+**To resolve:** Adding `sending` to a parameter changes name mangling, so any
+adoption must preserve the mangling using `@_silgen_name`. Adopting `sending`
+in parameter position must preserve the ownership convention of parameters. No
 additional annotation is necessary if the parameter already has an explicit
 ownership modifier. For all functions except initializers, use
 `__shared sending` to preserve the ownership convention:
