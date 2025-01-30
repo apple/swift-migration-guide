@@ -267,9 +267,11 @@ conforming types and it can impose restrictions on generic code using the
 protocol.
 
 You can stage in diagnostics caused by adding global actor isolation on a
-protocol using `@preconcurrency`.
+protocol using [`@preconcurrency`][Preconcurrency].
 This will preserve source compatibility with clients that have not yet
 begun adopting concurrency.
+
+[Preconcurrency]: libraryevolution#Preconcurrency-annotations
 
 ```swift
 @preconcurrency @MainActor
