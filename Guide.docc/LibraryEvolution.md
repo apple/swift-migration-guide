@@ -154,7 +154,9 @@ extension P {
 ```
 
 Language affordances for precise control over the ABI of a declaration are
-[under development](https://forums.swift.org/t/pitch-controlling-the-abi-of-a-declaration/75123).
+[under development][ABIAttr].
+
+[ABIAttr]: https://forums.swift.org/t/pitch-controlling-the-abi-of-a-declaration/75123
 
 ### Function declarations and types
 
