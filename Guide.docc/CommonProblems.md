@@ -570,7 +570,7 @@ sendability is side-stepped entirely.
 ### Sending Argument
 
 The compiler will permit non-`Sendable` values to cross an isolation boundary
-if can can prove it can be done safely.
+if the compiler can prove it can be done safely.
 Functions that explicitly state they require this can use the values
 within their implementations with less restrictions.
 
