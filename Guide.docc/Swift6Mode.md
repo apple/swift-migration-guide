@@ -4,7 +4,7 @@ Guarantee your code is free of data races by enabling the Swift 6 language mode.
 
 ## Using the Swift compiler
 
-To enable complete concurrency checking when running `swift` or `swiftc`
+To enable the Swift 6 language mode when running `swift` or `swiftc`
 directly at the command line, pass `-swift-version 6`:
 
 ```
