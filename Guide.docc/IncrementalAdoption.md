@@ -66,7 +66,7 @@ APIs][continuation-apis] that exist to make interfacing non-async and async code
 > Note: Introducing asynchronous code into a project can surface data isolation
 checking violations. To understand and address these, see [Crossing Isolation Boundaries][]
 
-[Crossing Isolation Boundaries]: commonproblems#Crossing-Isolation-Boundaries
+[Crossing Isolation Boundaries]: <doc:CommonProblems#Crossing-Isolation-Boundaries>
 [continuation-apis]: https://developer.apple.com/documentation/swift/concurrency#continuations
 
 ## Dynamic Isolation
@@ -323,8 +323,8 @@ The `@preconcurrency` annotation can help with many of these situations:
 - [Non-Sendable types][]
 - Mismatches in [protocol-conformance isolation][]
 
-[Non-Sendable types]: commonproblems#Crossing-Isolation-Boundaries
-[protocol-conformance isolation]: commonproblems#Crossing-Isolation-Boundaries
+[Non-Sendable types]: <doc:CommonProblems#Non-Sendable-Types>
+[protocol-conformance isolation]: <doc:CommonProblems#Protocol-Conformance-Isolation-Mismatch>
 
 ## C/Objective-C
 
