@@ -271,7 +271,7 @@ protocol using [`@preconcurrency`][Preconcurrency].
 This will preserve source compatibility with clients that have not yet
 begun adopting concurrency.
 
-[Preconcurrency]: libraryevolution#Preconcurrency-annotations
+[Preconcurrency]: <doc:LibraryEvolution#Preconcurrency-annotations>
 
 ```swift
 @preconcurrency @MainActor
@@ -343,7 +343,7 @@ of the conforming class is always enforced.
 > Note: To learn more about incremental adoption and dynamic isolation,
 see [Dynamic Isolation][]
 
-[Dynamic Isolation]: incrementaladoption#Dynamic-Isolation
+[Dynamic Isolation]: <doc:IncrementalAdoption#Dynamic-Isolation>
 
 ### Isolated Conforming Type
 
