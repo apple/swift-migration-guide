@@ -23,7 +23,7 @@ directly at the command line, pass `-strict-concurrency=complete`:
 
 ## Using SwiftPM
 
-### In a SwiftPM command-line invocation
+### Command-line invocation
 
 `-strict-concurrency=complete` can be passed in a Swift package manager
 command-line invocation using the `-Xswiftc` flag:
@@ -37,7 +37,7 @@ This can be useful to gauge the amount of concurrency warnings before adding
 the flag permanently in the package manifest as described in the following
 section.
 
-### In a SwiftPM package manifest
+### Package manifest
 
 To enable complete concurrency checking for a target in a Swift package using
 Swift 5.9 or Swift 5.10 tools, use [`SwiftSetting.enableExperimentalFeature`](https://developer.apple.com/documentation/packagedescription/swiftsetting/enableexperimentalfeature(_:_:))
@@ -69,9 +69,15 @@ enabled unconditionally and do not require any settings changes.
 
 ## Using Xcode
 
+### Build Settings
+
 To enable complete concurrency checking in an Xcode project, set the
 "Strict Concurrency Checking" setting to "Complete" in the Xcode build
-settings. Alternatively, you can set `SWIFT_STRICT_CONCURRENCY` to `complete`
+settings.
+
+### XCConfig
+
+Alternatively, you can set `SWIFT_STRICT_CONCURRENCY` to `complete`
 in an xcconfig file:
 
 ```
